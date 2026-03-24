@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<meta name="theme-color" content="#0f1a14"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Renovar"/>
+<title>Renovar</title>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icons/icon-192.png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0f1a14;
+  --bg2: #162010;
+  --bg3: #1c2a18;
+  --card: #1a2416;
+  --card2: #1f2c1a;
+  --green: #4ade80;
+  --green2: #22c55e;
+  --green3: #16a34a;
+  --greenfaint: rgba(74,222,128,0.08);
+  --greenborder: rgba(74,222,128,0.2);
+  --text: #f0f7f0;
+  --text2: #9ab89a;
+  --text3: #5a7a5a;
+  --red: #f87171;
+  --redfaint: rgba(248,113,113,0.08);
+  --redborder: rgba(248,113,113,0.25);
+  --amber: #fbbf24;
+  --amberfaint: rgba(251,191,36,0.08);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; }
+
+/* SCREENS */
+.screen { position: fixed; inset: 0; display: flex; flex-direction: column; overflow: hidden; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+.screen.active { opacity: 1; pointer-events: all; }
+
+/* ONBOARDING */
+#screen-onboarding { background: var(--bg); justify-content: center; align-items: center; padding: 2rem; }
+.onb-inner { max-width: 340px; width: 100%; }
+.onb-logo { font-family: 'Playfair Display', serif; font-size: 42px; color: var(--green); margin-bottom: 0.25rem; }
+.onb-sub { font-size: 13px; color: var(--text3); margin-bottom: 2.5rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.onb-label { font-size: 12px; color: var(--text2); margin-bottom: 8px; letter-spacing: 0.05em; text-transform: uppercase; }
+.onb-select { width: 100%; padding: 12px 16px; background: var(--card); border: 0.5px solid var(--greenborder); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; margin-bottom: 1.25rem; appearance: none; }
+.onb-row { display: flex; gap: 10px; align-items: flex-end; margin-bottom: 1.25rem; }
+.onb-input { flex: 1; padding: 12px 16px; background: var(--card); border: 0.5px solid var(--greenborder); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; }
+.onb-input::placeholder { color: var(--text3); }
+.onb-hint { font-size: 12px; color: var(--text3); margin-top: -1rem; margin-bottom: 1.25rem; }
+.btn-main { width: 100%; padding: 14px; background: var(--green); border: none; border-radius: var(--radius-sm); color: #0f1a14; font-size: 16px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background 0.2s; }
+.btn-main:active { background: var(--green2); }
+
+/* MAIN APP */
+#screen-app { background: var(--bg); }
+.topbar { padding: 52px 20px 16px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
+.topbar-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--green); }
+.topbar-settings { width: 36px; height: 36px; border-radius: 50%; background: var(--card); border: 0.5px solid var(--greenborder); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+.scroll-area { flex: 1; overflow-y: auto; padding: 0 16px 100px; -webkit-overflow-scrolling: touch; }
+.scroll-area::-webkit-scrollbar { display: none; }
+
+/* DAY HERO */
+.day-hero { text-align: center; padding: 1.5rem 0 1rem; }
+.day-num { font-family: 'Playfair Display', serif; font-size: 80px; line-height: 1; color: var(--green); }
+.day-word { font-size: 13px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+.streak-dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin: 1rem auto; max-width: 280px; }
+.dot { width: 18px; height: 18px; border-radius: 50%; background: var(--card2); border: 0.5px solid var(--greenborder); transition: background 0.3s; }
+.dot.filled { background: var(--green3); border-color: var(--green3); }
+.dot.today { background: var(--green); border-color: var(--green); box-shadow: 0 0 0 3px rgba(74,222,128,0.25); }
+
+/* CARDS */
+.card { background: var(--card); border: 0.5px solid rgba(255,255,255,0.06); border-radius: var(--radius); padding: 1rem 1.125rem; margin-bottom: 10px; }
+.card-label { font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+.verse-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 15px; color: var(--text); line-height: 1.6; }
+.verse-ref { font-size: 12px; color: var(--text3); margin-top: 6px; }
+.phase-text { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+/* MOOD GRID */
+.mood-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; }
+.mood-chip { padding: 9px 6px; border-radius: var(--radius-xs); border: 0.5px solid rgba(255,255,255,0.07); background: var(--card2); font-size: 12px; color: var(--text2); text-align: center; cursor: pointer; transition: all 0.15s; }
+.mood-chip:active { transform: scale(0.96); }
+.mood-chip.sel { background: var(--greenfaint); border-color: var(--greenborder); color: var(--green); }
+
+/* VICTORY */
+.vic-row { display: flex; gap: 8px; }
+.vic-btn { flex: 1; padding: 11px 6px; border-radius: var(--radius-xs); border: 0.5px solid rgba(255,255,255,0.07); background: var(--card2); font-size: 12px; color: var(--text2); text-align: center; cursor: pointer; transition: all 0.15s; }
+.vic-btn.win { background: var(--greenfaint); border-color: var(--greenborder); color: var(--green); }
+.vic-btn.loss { background: var(--redfaint); border-color: var(--redborder); color: var(--red); }
+.vic-btn.neutral { background: var(--amberfaint); border-color: rgba(251,191,36,0.25); color: var(--amber); }
+
+/* FALL ANALYSIS */
+.fall-section { display: none; margin-top: 10px; }
+.fall-section.visible { display: block; }
+.fall-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 10px; }
+.fall-chip { padding: 9px 8px; border-radius: var(--radius-xs); border: 0.5px solid rgba(255,255,255,0.07); background: var(--card2); font-size: 12px; color: var(--text2); text-align: center; cursor: pointer; transition: all 0.15s; }
+.fall-chip.sel { background: var(--redfaint); border-color: var(--redborder); color: var(--red); }
+
+/* VOICE NOTE */
+.voice-row { display: flex; gap: 8px; align-items: flex-start; }
+.voice-btn { width: 42px; height: 42px; border-radius: 50%; border: 0.5px solid var(--greenborder); background: var(--card2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; flex-shrink: 0; transition: all 0.2s; margin-top: 1px; }
+.voice-btn.recording { background: var(--redfaint); border-color: var(--redborder); animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.3); } 50% { box-shadow: 0 0 0 6px rgba(248,113,113,0); } }
+.note-area { flex: 1; padding: 10px 12px; background: var(--card2); border: 0.5px solid rgba(255,255,255,0.07); border-radius: var(--radius-xs); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; resize: none; min-height: 80px; }
+.note-area::placeholder { color: var(--text3); }
+
+/* SAVE BTN */
+.save-btn { width: 100%; padding: 14px; background: var(--green); border: none; border-radius: var(--radius-sm); color: #0f1a14; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px; transition: background 0.2s; }
+.save-btn:active { background: var(--green2); }
+.reset-btn { width: 100%; padding: 11px; background: transparent; border: 0.5px solid var(--redborder); border-radius: var(--radius-sm); color: var(--red); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
+
+/* BOTTOM NAV */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 0.5px solid rgba(255,255,255,0.06); display: flex; padding: 8px 0 20px; z-index: 100; }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; padding: 6px 0; }
+.nav-icon { font-size: 20px; opacity: 0.4; transition: opacity 0.2s; }
+.nav-label { font-size: 10px; color: var(--text3); letter-spacing: 0.05em; transition: color 0.2s; }
+.nav-item.active .nav-icon { opacity: 1; }
+.nav-item.active .nav-label { color: var(--green); }
+
+/* TAB PAGES */
+.tab-page { display: none; }
+.tab-page.active { display: block; }
+
+/* HISTORIAL */
+.log-entry { background: var(--card); border: 0.5px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; }
+.log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.log-day { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--green); }
+.log-date { font-size: 11px; color: var(--text3); }
+.log-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.tag { font-size: 11px; padding: 3px 8px; border-radius: 20px; }
+.tag-green { background: var(--greenfaint); color: var(--green); border: 0.5px solid var(--greenborder); }
+.tag-red { background: var(--redfaint); color: var(--red); border: 0.5px solid var(--redborder); }
+.tag-amber { background: var(--amberfaint); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.25); }
+.log-note { font-size: 13px; color: var(--text2); line-height: 1.5; }
+
+/* PATTERNS */
+.pattern-card { background: var(--card); border: 0.5px solid rgba(255,255,255,0.05); border-radius: var(--radius); padding: 1rem 1.125rem; margin-bottom: 10px; }
+.pattern-title { font-size: 13px; color: var(--text2); margin-bottom: 10px; }
+.pattern-bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+.pattern-bar-label { font-size: 12px; color: var(--text3); min-width: 80px; }
+.pattern-bar-bg { flex: 1; height: 6px; background: var(--card2); border-radius: 3px; overflow: hidden; }
+.pattern-bar-fill { height: 100%; background: var(--red); border-radius: 3px; transition: width 0.5s; }
+.pattern-count { font-size: 11px; color: var(--text3); min-width: 20px; text-align: right; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; line-height: 1.7; }
+
+/* IDENTIDAD */
+.identity-card { background: var(--card); border: 0.5px solid var(--greenborder); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 10px; }
+.identity-text { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--text); line-height: 1.7; font-style: italic; }
+.verse-list-item { border-bottom: 0.5px solid rgba(255,255,255,0.05); padding: 12px 0; }
+.verse-list-item:last-child { border-bottom: none; }
+.verse-list-text { font-family: 'Playfair Display', serif; font-style: italic; font-size: 14px; color: var(--text2); line-height: 1.5; margin-bottom: 4px; }
+.verse-list-ref { font-size: 11px; color: var(--text3); }
+
+/* SETTINGS SCREEN */
+#screen-settings { background: var(--bg); flex-direction: column; overflow-y: auto; }
+.settings-top { padding: 52px 20px 16px; display: flex; align-items: center; gap: 12px; }
+.settings-back { width: 36px; height: 36px; border-radius: 50%; background: var(--card); border: 0.5px solid var(--greenborder); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; }
+.settings-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--text); }
+.settings-body { padding: 0 16px 40px; }
+.settings-section { margin-bottom: 1.5rem; }
+.settings-section-title { font-size: 10px; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; }
+.settings-item { background: var(--card); border: 0.5px solid rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+.settings-item-label { font-size: 14px; color: var(--text); }
+.settings-item-value { font-size: 13px; color: var(--text3); }
+.settings-select { background: transparent; border: none; color: var(--green); font-size: 14px; font-family: 'DM Sans', sans-serif; text-align: right; appearance: none; cursor: pointer; }
+.settings-day-row { display: flex; gap: 8px; align-items: center; }
+.settings-day-input { width: 70px; padding: 8px 10px; background: var(--card2); border: 0.5px solid var(--greenborder); border-radius: var(--radius-xs); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; text-align: center; }
+.settings-day-btn { padding: 8px 14px; background: var(--green); border: none; border-radius: var(--radius-xs); color: #0f1a14; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; }
+
+/* TOAST */
+.toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); border: 0.5px solid var(--greenborder); border-radius: var(--radius-sm); padding: 10px 20px; font-size: 13px; color: var(--green); opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div class="screen active" id="screen-onboarding">
+  <div class="onb-inner">
+    <div class="onb-logo">Renovar</div>
+    <div class="onb-sub" id="onb-sub">Tu camino, día a día</div>
+    <div class="onb-label" id="onb-lang-label">Idioma / Language / Idioma</div>
+    <select class="onb-select" id="onb-lang" onchange="onbLangChange()">
+      <option value="es">Español</option>
+      <option value="en">English</option>
+      <option value="pt">Português</option>
+    </select>
+    <div class="onb-label" id="onb-days-label">¿Ya tenés días de racha?</div>
+    <div class="onb-hint" id="onb-days-hint">Dejá en 0 si estás empezando hoy</div>
+    <div class="onb-row">
+      <input type="number" class="onb-input" id="onb-days" value="0" min="0" max="365" placeholder="0"/>
+    </div>
+    <button class="btn-main" id="onb-btn" onclick="completeOnboarding()">Comenzar</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div class="screen" id="screen-app">
+  <div class="topbar">
+    <div class="topbar-title">Renovar</div>
+    <div class="topbar-settings" onclick="openSettings()">⚙</div>
+  </div>
+  <div class="scroll-area">
+
+    <!-- TODAY TAB -->
+    <div class="tab-page active" id="tab-hoy">
+      <div class="day-hero">
+        <div class="day-num" id="dayNum">0</div>
+        <div class="day-word" id="dayWord">días</div>
+        <div class="streak-dots" id="streakDots"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label" id="lbl-verse">Versículo del día</div>
+        <div class="verse-text" id="verseText"></div>
+        <div class="verse-ref" id="verseRef"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label" id="lbl-phase">En este punto...</div>
+        <div class="phase-text" id="phaseText"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label" id="lbl-mood">¿Cómo te sentís hoy?</div>
+        <div class="mood-grid" id="moodGrid"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label" id="lbl-battle">¿Tuviste tentaciones hoy?</div>
+        <div class="vic-row">
+          <div class="vic-btn win" id="btn-vic" onclick="setVictory('victoria')"><span id="lbl-vic">Victoria</span></div>
+          <div class="vic-btn loss" id="btn-fall" onclick="setVictory('caida')"><span id="lbl-fall">Caída</span></div>
+          <div class="vic-btn neutral" id="btn-none" onclick="setVictory('ninguna')"><span id="lbl-none">Ninguna</span></div>
+        </div>
+        <div class="fall-section" id="fallSection">
+          <div class="card-label" style="margin-top:12px;" id="lbl-why">¿Qué crees que la causó?</div>
+          <div class="fall-grid" id="fallGrid"></div>
+          <div class="card-label" id="lbl-time">¿En qué momento?</div>
+          <div class="fall-grid" id="timeGrid"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label" id="lbl-note">Nota del día</div>
+        <div class="voice-row">
+          <div class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎙</div>
+          <textarea class="note-area" id="noteInput" rows="3"></textarea>
+        </div>
+      </div>
+
+      <button class="save-btn" id="saveBtn" onclick="saveDay()">Guardar día</button>
+      <button class="reset-btn" id="resetBtn" onclick="resetStreak()">Reiniciar racha</button>
+      <div style="height:10px;"></div>
+    </div>
+
+    <!-- HISTORIAL TAB -->
+    <div class="tab-page" id="tab-historial">
+      <div id="historialContent"></div>
+    </div>
+
+    <!-- PATRONES TAB -->
+    <div class="tab-page" id="tab-patrones">
+      <div id="patronesContent"></div>
+    </div>
+
+    <!-- IDENTIDAD TAB -->
+    <div class="tab-page" id="tab-identidad">
+      <div class="identity-card">
+        <div class="identity-text" id="identityText"></div>
+      </div>
+      <div class="card">
+        <div class="card-label" id="lbl-verses">Versículos clave</div>
+        <div id="verseList"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <div class="nav-item active" id="nav-hoy" onclick="switchTab('hoy')">
+      <div class="nav-icon">☀</div>
+      <div class="nav-label" id="nav-lbl-hoy">Hoy</div>
+    </div>
+    <div class="nav-item" id="nav-historial" onclick="switchTab('historial')">
+      <div class="nav-icon">📋</div>
+      <div class="nav-label" id="nav-lbl-hist">Historial</div>
+    </div>
+    <div class="nav-item" id="nav-patrones" onclick="switchTab('patrones')">
+      <div class="nav-icon">📊</div>
+      <div class="nav-label" id="nav-lbl-pat">Patrones</div>
+    </div>
+    <div class="nav-item" id="nav-identidad" onclick="switchTab('identidad')">
+      <div class="nav-icon">✦</div>
+      <div class="nav-label" id="nav-lbl-id">Identidad</div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="screen-settings">
+  <div class="settings-top">
+    <div class="settings-back" onclick="closeSettings()">←</div>
+    <div class="settings-title" id="settings-title">Configuración</div>
+  </div>
+  <div class="settings-body">
+    <div class="settings-section">
+      <div class="settings-section-title" id="set-lbl-lang">Idioma</div>
+      <div class="settings-item">
+        <div class="settings-item-label" id="set-lang-label">Idioma</div>
+        <select class="settings-select" id="settings-lang" onchange="changeLang(this.value)">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+        </select>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title" id="set-lbl-streak">Racha</div>
+      <div class="settings-item">
+        <div class="settings-item-label" id="set-day-label">Estoy en el día</div>
+        <div class="settings-day-row">
+          <input type="number" class="settings-day-input" id="settings-day-input" min="0" max="365" placeholder="0"/>
+          <button class="settings-day-btn" id="settings-day-btn" onclick="setManualDay()">OK</button>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-section-title" id="set-lbl-data">Datos</div>
+      <div class="settings-item" style="cursor:pointer;" onclick="exportData()">
+        <div class="settings-item-label" id="set-export-label">Exportar historial</div>
+        <div class="settings-item-value">→</div>
+      </div>
+      <div class="settings-item" style="cursor:pointer;" onclick="confirmReset()">
+        <div class="settings-item-label" style="color:var(--red);" id="set-reset-label">Borrar todos los datos</div>
+        <div class="settings-item-value">→</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── I18N ───────────────────────────────────────────────
+const T = {
+  es: {
+    days: 'días de racha', day: 'día de racha',
+    verse: 'Versículo del día', phase: 'En este punto...', mood: '¿Cómo te sentís hoy?',
+    battle: '¿Tuviste tentaciones hoy?', vic: 'Victoria', fall: 'Caída', none: 'Ninguna',
+    why: '¿Qué crees que la causó?', time: '¿En qué momento del día?',
+    note: 'Nota del día', notePH: '¿Qué pasó hoy? Podés dictar con el micrófono...',
+    save: 'Guardar día', reset: 'Reiniciar racha',
+    today: 'Hoy', hist: 'Historial', pat: 'Patrones', id: 'Identidad',
+    settings: 'Configuración', langLabel: 'Idioma', streakLabel: 'Racha',
+    dayLabel: 'Estoy en el día', dataLabel: 'Datos', exportLabel: 'Exportar historial',
+    resetLabel: 'Borrar todos los datos', setLang: 'Idioma', setStreak: 'Racha', setData: 'Datos',
+    saved: '✓ Día guardado', resetDone: 'Racha reiniciada', daySet: 'Racha actualizada',
+    confirmReset: '¿Reiniciar racha? El historial se conserva.',
+    confirmNuke: '¿Borrar TODOS los datos? Esto no se puede deshacer.',
+    onbSub: 'Tu camino, día a día', onbLang: 'Idioma', onbDaysLabel: '¿Ya tenés días de racha?',
+    onbDaysHint: 'Dejá en 0 si estás empezando hoy', onbBtn: 'Comenzar',
+    moods: ['Claro','Tranquilo','En paz','Tentado','Triste','Enérgico','Ansioso','Esperanzado','Cansado'],
+    causes: ['Soledad','Redes sociales','Noche tarde','Estrés','Aburrimiento','Pantallas','Alcohol','Recuerdo'],
+    times: ['Mañana','Mediodía','Tarde','Noche','Madrugada'],
+    phases: {
+      0: 'El inicio es lo más difícil. El hecho de que estés acá ya es una decisión.',
+      1: 'El impulso físico está en su punto más alto. Es normal sentir tensión. Respirá, movete, ora.',
+      4: 'El cuerpo empieza a adaptarse. Pueden venir sueños intensos o irritabilidad.',
+      8: 'Muchos reportan más claridad mental y más energía. El cerebro se está recalibrando.',
+      15: 'La racha empieza a sentirse real. El peligro acá es la confianza excesiva — seguí alerta.',
+      22: 'Un mes se acerca. La tentación puede volver con fuerza. No te sorprendas, solo resistí.',
+      31: 'Estás construyendo un hábito real. Lo que antes parecía imposible, ahora es tu nueva normalidad.',
+      61: 'Estás en territorio de transformación profunda. Tu corazón y tu mente están cambiando.'
+    },
+    identity: '"Soy un hombre que cuida su corazón y el de los demás.\n\nElijo la pureza no por miedo, sino porque creo en algo mejor.\n\nSoy capaz de amar de verdad — y eso requiere disciplina hoy."',
+    versesKey: [
+      { text: 'Crea en mí, oh Dios, un corazón limpio.', ref: 'Salmo 51:10' },
+      { text: 'Huye de las pasiones juveniles, y sigue la justicia, la fe, el amor y la paz.', ref: '2 Timoteo 2:22' },
+      { text: 'El fruto del Espíritu es dominio propio.', ref: 'Gálatas 5:23' },
+      { text: 'Todo lo puedo en Cristo que me fortalece.', ref: 'Filipenses 4:13' },
+      { text: '¿Con qué limpiará el joven su camino? Con guardar tu palabra.', ref: 'Salmo 119:9' },
+    ],
+    emptyHist: 'Todavía no hay entradas.\nGuardá tu primer día.',
+    emptyPat: 'Cuando registres caídas,\nverás los patrones acá.',
+    patTitle: 'Causas de caídas', patTime: 'Momentos del día',
+    voices: ['Claro', 'Tranquilo', 'En paz', 'Tentado', 'Triste', 'Enérgico', 'Ansioso', 'Esperanzado', 'Cansado'],
+    recording: 'Grabando... tocá para detener',
+    recordingDone: 'Transcripción lista',
+    recordNoSupport: 'Tu navegador no soporta dictado de voz',
+  },
+  en: {
+    days: 'day streak', day: 'day streak',
+    verse: 'Verse of the day', phase: 'At this point...', mood: 'How are you feeling today?',
+    battle: 'Did you face temptation today?', vic: 'Victory', fall: 'Relapse', none: 'None',
+    why: 'What do you think caused it?', time: 'What time of day?',
+    note: 'Note for today', notePH: 'What happened today? You can dictate with the mic...',
+    save: 'Save day', reset: 'Reset streak',
+    today: 'Today', hist: 'History', pat: 'Patterns', id: 'Identity',
+    settings: 'Settings', langLabel: 'Language', streakLabel: 'Streak',
+    dayLabel: "I'm on day", dataLabel: 'Data', exportLabel: 'Export history',
+    resetLabel: 'Delete all data', setLang: 'Language', setStreak: 'Streak', setData: 'Data',
+    saved: '✓ Day saved', resetDone: 'Streak reset', daySet: 'Streak updated',
+    confirmReset: 'Reset streak? History will be kept.',
+    confirmNuke: 'Delete ALL data? This cannot be undone.',
+    onbSub: 'Your journey, day by day', onbLang: 'Language', onbDaysLabel: 'Already have a streak?',
+    onbDaysHint: 'Leave at 0 if starting today', onbBtn: 'Begin',
+    moods: ['Clear','Peaceful','At peace','Tempted','Sad','Energetic','Anxious','Hopeful','Tired'],
+    causes: ['Loneliness','Social media','Late night','Stress','Boredom','Screens','Alcohol','Memory'],
+    times: ['Morning','Noon','Afternoon','Evening','Late night'],
+    phases: {
+      0: 'Starting is the hardest part. The fact that you\'re here is already a decision.',
+      1: 'Physical urges are at their peak. Tension is normal. Breathe, move, pray.',
+      4: 'Your body is adapting. Vivid dreams or irritability may come — it\'s part of the process.',
+      8: 'Many report mental clarity and more energy. Your brain is recalibrating.',
+      15: 'The streak feels real. Overconfidence is the danger now — stay alert.',
+      22: 'A month is near. Temptation may return with force. Don\'t be surprised — just resist.',
+      31: 'You\'re building a real habit. What felt impossible is becoming your new normal.',
+      61: 'You\'re in the territory of deep transformation. Heart and mind are changing.'
+    },
+    identity: '"I am a man who guards his heart and the hearts of others.\n\nI choose purity not out of fear, but because I believe in something better.\n\nI am capable of real love — and that requires discipline today."',
+    versesKey: [
+      { text: 'Create in me a clean heart, O God.', ref: 'Psalm 51:10' },
+      { text: 'Flee youthful passions and pursue righteousness, faith, love, and peace.', ref: '2 Timothy 2:22' },
+      { text: 'The fruit of the Spirit is self-control.', ref: 'Galatians 5:23' },
+      { text: 'I can do all things through Christ who strengthens me.', ref: 'Philippians 4:13' },
+      { text: 'How can a young man keep his way pure? By guarding it according to your word.', ref: 'Psalm 119:9' },
+    ],
+    emptyHist: 'No entries yet.\nSave your first day.',
+    emptyPat: 'When you log relapses,\nyou\'ll see patterns here.',
+    patTitle: 'Relapse causes', patTime: 'Time of day',
+    recording: 'Recording... tap to stop',
+    recordingDone: 'Transcription ready',
+    recordNoSupport: 'Your browser doesn\'t support voice dictation',
+  },
+  pt: {
+    days: 'dias de sequência', day: 'dia de sequência',
+    verse: 'Versículo do dia', phase: 'Neste ponto...', mood: 'Como você está hoje?',
+    battle: 'Teve tentações hoje?', vic: 'Vitória', fall: 'Recaída', none: 'Nenhuma',
+    why: 'O que você acha que causou?', time: 'Em que momento do dia?',
+    note: 'Nota do dia', notePH: 'O que aconteceu hoje? Pode ditar com o microfone...',
+    save: 'Salvar dia', reset: 'Reiniciar sequência',
+    today: 'Hoje', hist: 'Histórico', pat: 'Padrões', id: 'Identidade',
+    settings: 'Configurações', langLabel: 'Idioma', streakLabel: 'Sequência',
+    dayLabel: 'Estou no dia', dataLabel: 'Dados', exportLabel: 'Exportar histórico',
+    resetLabel: 'Apagar todos os dados', setLang: 'Idioma', setStreak: 'Sequência', setData: 'Dados',
+    saved: '✓ Dia salvo', resetDone: 'Sequência reiniciada', daySet: 'Sequência atualizada',
+    confirmReset: 'Reiniciar sequência? O histórico será mantido.',
+    confirmNuke: 'Apagar TODOS os dados? Isso não pode ser desfeito.',
+    onbSub: 'Sua jornada, dia a dia', onbLang: 'Idioma', onbDaysLabel: 'Já tem dias de sequência?',
+    onbDaysHint: 'Deixe em 0 se estiver começando hoje', onbBtn: 'Começar',
+    moods: ['Claro','Tranquilo','Em paz','Tentado','Triste','Enérgico','Ansioso','Esperançoso','Cansado'],
+    causes: ['Solidão','Redes sociais','Noite tarde','Estresse','Tédio','Telas','Álcool','Lembrança'],
+    times: ['Manhã','Meio-dia','Tarde','Noite','Madrugada'],
+    phases: {
+      0: 'Começar é o mais difícil. O fato de você estar aqui já é uma decisão.',
+      1: 'Os impulsos físicos estão no pico. Tensão é normal. Respire, mexa-se, ore.',
+      4: 'O corpo começa a se adaptar. Sonhos intensos ou irritabilidade podem vir.',
+      8: 'Muitos relatam mais clareza mental e energia. O cérebro está se recalibrando.',
+      15: 'A sequência começa a parecer real. O perigo agora é a confiança excessiva.',
+      22: 'Um mês está próximo. A tentação pode voltar com força. Só resista.',
+      31: 'Você está construindo um hábito real. O que parecia impossível vira normalidade.',
+      61: 'Você está em território de transformação profunda. Coração e mente estão mudando.'
+    },
+    identity: '"Sou um homem que cuida do seu coração e dos outros.\n\nEscolho a pureza não por medo, mas porque acredito em algo melhor.\n\nSou capaz de amar de verdade — e isso exige disciplina hoje."',
+    versesKey: [
+      { text: 'Cria em mim, ó Deus, um coração puro.', ref: 'Salmo 51:10' },
+      { text: 'Foge das paixões juvenis e segue a justiça, a fé, o amor e a paz.', ref: '2 Timóteo 2:22' },
+      { text: 'O fruto do Espírito é domínio próprio.', ref: 'Gálatas 5:23' },
+      { text: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' },
+      { text: 'Como o jovem manterá puro o seu caminho? Guardando-o segundo a tua palavra.', ref: 'Salmo 119:9' },
+    ],
+    emptyHist: 'Ainda não há entradas.\nSalve seu primeiro dia.',
+    emptyPat: 'Quando registrar recaídas,\nverá os padrões aqui.',
+    patTitle: 'Causas de recaídas', patTime: 'Momento do dia',
+    recording: 'Gravando... toque para parar',
+    recordingDone: 'Transcrição pronta',
+    recordNoSupport: 'Seu navegador não suporta ditado de voz',
+  }
+};
+
+const VERSES = {
+  es: [
+    { text: 'Crea en mí, oh Dios, un corazón limpio, y renueva un espíritu recto dentro de mí.', ref: 'Salmo 51:10' },
+    { text: 'Huye también de las pasiones juveniles, y sigue la justicia, la fe, el amor y la paz.', ref: '2 Timoteo 2:22' },
+    { text: 'El que confía en el Señor es bienaventurado.', ref: 'Proverbios 16:20' },
+    { text: 'Todo lo puedo en Cristo que me fortalece.', ref: 'Filipenses 4:13' },
+    { text: 'El fruto del Espíritu es dominio propio.', ref: 'Gálatas 5:23' },
+    { text: 'Bienaventurados los de limpio corazón, porque ellos verán a Dios.', ref: 'Mateo 5:8' },
+    { text: 'No os conforméis a este siglo, sino transformaos por medio de la renovación de vuestro entendimiento.', ref: 'Romanos 12:2' },
+    { text: '¿Con qué limpiará el joven su camino? Con guardar tu palabra.', ref: 'Salmo 119:9' },
+    { text: 'Mas el que persevere hasta el fin, éste será salvo.', ref: 'Mateo 24:13' },
+    { text: 'No nos ha dado Dios espíritu de cobardía, sino de poder, de amor y de dominio propio.', ref: '2 Timoteo 1:7' },
+    { text: 'Vela y ora, para que no entres en tentación.', ref: 'Mateo 26:41' },
+    { text: 'Someteos a Dios; resistid al diablo, y huirá de vosotros.', ref: 'Santiago 4:7' },
+    { text: 'Si el Hijo os libertare, seréis verdaderamente libres.', ref: 'Juan 8:36' },
+    { text: 'El que domina su espíritu es mejor que el que toma una ciudad.', ref: 'Proverbios 16:32' },
+  ],
+  en: [
+    { text: 'Create in me a clean heart, O God, and renew a right spirit within me.', ref: 'Psalm 51:10' },
+    { text: 'Flee youthful passions and pursue righteousness, faith, love, and peace.', ref: '2 Timothy 2:22' },
+    { text: 'Whoever trusts in the Lord is blessed.', ref: 'Proverbs 16:20' },
+    { text: 'I can do all things through Christ who strengthens me.', ref: 'Philippians 4:13' },
+    { text: 'The fruit of the Spirit is self-control.', ref: 'Galatians 5:23' },
+    { text: 'Blessed are the pure in heart, for they shall see God.', ref: 'Matthew 5:8' },
+    { text: 'Do not be conformed to this world, but be transformed by the renewal of your mind.', ref: 'Romans 12:2' },
+    { text: 'How can a young man keep his way pure? By guarding it according to your word.', ref: 'Psalm 119:9' },
+    { text: 'The one who endures to the end will be saved.', ref: 'Matthew 24:13' },
+    { text: 'God gave us a spirit not of fear but of power and love and self-control.', ref: '2 Timothy 1:7' },
+    { text: 'Watch and pray that you may not enter into temptation.', ref: 'Matthew 26:41' },
+    { text: 'Submit to God. Resist the devil, and he will flee from you.', ref: 'James 4:7' },
+    { text: 'If the Son sets you free, you will be free indeed.', ref: 'John 8:36' },
+    { text: 'Whoever is slow to anger is better than the mighty.', ref: 'Proverbs 16:32' },
+  ],
+  pt: [
+    { text: 'Cria em mim, ó Deus, um coração puro e renova em mim um espírito inabalável.', ref: 'Salmo 51:10' },
+    { text: 'Foge das paixões juvenis e busca a justiça, a fé, o amor e a paz.', ref: '2 Timóteo 2:22' },
+    { text: 'Bem-aventurado o homem que confia no Senhor.', ref: 'Provérbios 16:20' },
+    { text: 'Tudo posso naquele que me fortalece.', ref: 'Filipenses 4:13' },
+    { text: 'O fruto do Espírito é domínio próprio.', ref: 'Gálatas 5:23' },
+    { text: 'Bem-aventurados os puros de coração, pois eles verão a Deus.', ref: 'Mateus 5:8' },
+    { text: 'Não vos conformeis com este século, mas transformai-vos pela renovação da vossa mente.', ref: 'Romanos 12:2' },
+    { text: 'Como o jovem manterá puro o seu caminho? Guardando-o segundo a tua palavra.', ref: 'Salmo 119:9' },
+    { text: 'Aquele que perseverar até o fim será salvo.', ref: 'Mateus 24:13' },
+    { text: 'Deus não nos deu espírito de covardia, mas de poder, de amor e de equilíbrio.', ref: '2 Timóteo 1:7' },
+    { text: 'Vigiai e orai para que não entreis em tentação.', ref: 'Mateus 26:41' },
+    { text: 'Submetei-vos a Deus. Resistí ao diabo e ele fugirá de vós.', ref: 'Tiago 4:7' },
+    { text: 'Se o Filho vos libertar, sereis verdadeiramente livres.', ref: 'João 8:36' },
+    { text: 'Melhor é o que tarda em irar-se do que o poderoso.', ref: 'Provérbios 16:32' },
+  ]
+};
+
+// ─── STATE ───────────────────────────────────────────────
+let S = JSON.parse(localStorage.getItem('renovar_v1') || 'null') || {
+  onboarded: false, lang: 'es', days: 0, log: [],
+  todayMood: null, todayVictory: null, todayCauses: [], todayTime: null
+};
+let lang = S.lang || 'es';
+let t = T[lang];
+let recognition = null;
+let isRecording = false;
+
+// ─── ONBOARDING ──────────────────────────────────────────
+function onbLangChange() {
+  lang = document.getElementById('onb-lang').value;
+  t = T[lang];
+  document.getElementById('onb-sub').textContent = t.onbSub;
+  document.getElementById('onb-days-label').textContent = t.onbDaysLabel;
+  document.getElementById('onb-days-hint').textContent = t.onbDaysHint;
+  document.getElementById('onb-btn').textContent = t.onbBtn;
+}
+
+function completeOnboarding() {
+  const days = parseInt(document.getElementById('onb-days').value) || 0;
+  S.lang = document.getElementById('onb-lang').value;
+  S.days = days;
+  S.onboarded = true;
+  lang = S.lang;
+  t = T[lang];
+  save();
+  showApp();
+}
+
+// ─── APP INIT ────────────────────────────────────────────
+function showApp() {
+  document.getElementById('screen-onboarding').classList.remove('active');
+  document.getElementById('screen-app').classList.add('active');
+  applyLang();
+  render();
+}
+
+function applyLang() {
+  t = T[lang];
+  document.getElementById('dayWord').textContent = t.days;
+  document.getElementById('lbl-verse').textContent = t.verse;
+  document.getElementById('lbl-phase').textContent = t.phase;
+  document.getElementById('lbl-mood').textContent = t.mood;
+  document.getElementById('lbl-battle').textContent = t.battle;
+  document.getElementById('lbl-why').textContent = t.why;
+  document.getElementById('lbl-time').textContent = t.time;
+  document.getElementById('lbl-note').textContent = t.note;
+  document.getElementById('noteInput').placeholder = t.notePH;
+  document.getElementById('saveBtn').textContent = t.save;
+  document.getElementById('resetBtn').textContent = t.reset;
+  document.getElementById('lbl-vic').textContent = t.vic;
+  document.getElementById('lbl-fall').textContent = t.fall;
+  document.getElementById('lbl-none').textContent = t.none;
+  document.getElementById('nav-lbl-hoy').textContent = t.today;
+  document.getElementById('nav-lbl-hist').textContent = t.hist;
+  document.getElementById('nav-lbl-pat').textContent = t.pat;
+  document.getElementById('nav-lbl-id').textContent = t.id;
+  document.getElementById('settings-title').textContent = t.settings;
+  document.getElementById('set-lbl-lang').textContent = t.setLang;
+  document.getElementById('set-lbl-streak').textContent = t.setStreak;
+  document.getElementById('set-lbl-data').textContent = t.setData;
+  document.getElementById('set-lang-label').textContent = t.langLabel;
+  document.getElementById('set-day-label').textContent = t.dayLabel;
+  document.getElementById('set-export-label').textContent = t.exportLabel;
+  document.getElementById('set-reset-label').textContent = t.resetLabel;
+  document.getElementById('settings-lang').value = lang;
+  buildMoodGrid();
+  buildFallGrids();
+  buildIdentity();
+}
+
+function render() {
+  const days = S.days;
+  document.getElementById('dayNum').textContent = days;
+  const v = VERSES[lang][days % VERSES[lang].length];
+  document.getElementById('verseText').textContent = v.text;
+  document.getElementById('verseRef').textContent = '— ' + v.ref;
+  const phases = t.phases;
+  const keys = Object.keys(phases).map(Number).sort((a,b)=>b-a);
+  let ph = phases[0];
+  for (const k of keys) { if (days >= k) { ph = phases[k]; break; } }
+  document.getElementById('phaseText').textContent = ph;
+  buildStreakDots();
+  restoreTodayState();
+  renderHistorial();
+  renderPatrones();
+}
+
+function buildStreakDots() {
+  const bar = document.getElementById('streakDots');
+  bar.innerHTML = '';
+  const show = Math.max(S.days, 7);
+  for (let i = 0; i < show; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < S.days - 1 ? ' filled' : i === S.days - 1 && S.days > 0 ? ' today' : '');
+    bar.appendChild(d);
+  }
+}
+
+function buildMoodGrid() {
+  const grid = document.getElementById('moodGrid');
+  grid.innerHTML = '';
+  t.moods.forEach(m => {
+    const chip = document.createElement('div');
+    chip.className = 'mood-chip' + (S.todayMood === m ? ' sel' : '');
+    chip.textContent = m;
+    chip.onclick = () => selectMood(m);
+    grid.appendChild(chip);
+  });
+}
+
+function buildFallGrids() {
+  const fg = document.getElementById('fallGrid');
+  fg.innerHTML = '';
+  t.causes.forEach(c => {
+    const chip = document.createElement('div');
+    chip.className = 'fall-chip' + (S.todayCauses && S.todayCauses.includes(c) ? ' sel' : '');
+    chip.textContent = c;
+    chip.onclick = () => toggleCause(c);
+    fg.appendChild(chip);
+  });
+  const tg = document.getElementById('timeGrid');
+  tg.innerHTML = '';
+  t.times.forEach(tm => {
+    const chip = document.createElement('div');
+    chip.className = 'fall-chip' + (S.todayTime === tm ? ' sel' : '');
+    chip.textContent = tm;
+    chip.onclick = () => selectTime(tm);
+    tg.appendChild(chip);
+  });
+}
+
+function buildIdentity() {
+  document.getElementById('identityText').textContent = t.identity;
+  document.getElementById('lbl-verses').textContent = t.verse;
+  const vl = document.getElementById('verseList');
+  vl.innerHTML = '';
+  t.versesKey.forEach(v => {
+    vl.innerHTML += `<div class="verse-list-item"><div class="verse-list-text">${v.text}</div><div class="verse-list-ref">— ${v.ref}</div></div>`;
+  });
+}
+
+function restoreTodayState() {
+  buildMoodGrid();
+  buildFallGrids();
+  updateVicButtons();
+  if (S.todayVictory === 'caida') {
+    document.getElementById('fallSection').classList.add('visible');
+  }
+  if (S.todayNote) document.getElementById('noteInput').value = S.todayNote;
+}
+
+function updateVicButtons() {
+  document.getElementById('btn-vic').className = 'vic-btn win' + (S.todayVictory === 'victoria' ? ' sel' : '');
+  document.getElementById('btn-fall').className = 'vic-btn loss' + (S.todayVictory === 'caida' ? ' sel' : '');
+  document.getElementById('btn-none').className = 'vic-btn neutral' + (S.todayVictory === 'ninguna' ? ' sel' : '');
+  // highlight active
+  if (S.todayVictory === 'victoria') document.getElementById('btn-vic').style.opacity = '1';
+  if (S.todayVictory === 'caida') document.getElementById('btn-fall').style.opacity = '1';
+  if (S.todayVictory === 'ninguna') document.getElementById('btn-none').style.opacity = '1';
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────
+function selectMood(m) {
+  S.todayMood = m;
+  save();
+  document.querySelectorAll('.mood-chip').forEach(c => {
+    c.classList.toggle('sel', c.textContent === m);
+  });
+}
+
+function setVictory(type) {
+  S.todayVictory = type;
+  save();
+  updateVicButtons();
+  const fs = document.getElementById('fallSection');
+  if (type === 'caida') fs.classList.add('visible');
+  else fs.classList.remove('visible');
+}
+
+function toggleCause(c) {
+  S.todayCauses = S.todayCauses || [];
+  const idx = S.todayCauses.indexOf(c);
+  if (idx >= 0) S.todayCauses.splice(idx, 1);
+  else S.todayCauses.push(c);
+  save();
+  buildFallGrids();
+}
+
+function selectTime(tm) {
+  S.todayTime = tm;
+  save();
+  document.querySelectorAll('#timeGrid .fall-chip').forEach(c => {
+    c.classList.toggle('sel', c.textContent === tm);
+  });
+}
+
+function saveDay() {
+  const note = document.getElementById('noteInput').value.trim();
+  const today = new Date().toLocaleDateString('es-PY');
+  S.log = S.log || [];
+  const existing = S.log.findIndex(e => e.date === today);
+  const entry = {
+    day: S.days + 1, date: today, lang,
+    mood: S.todayMood, victory: S.todayVictory,
+    causes: [...(S.todayCauses || [])], time: S.todayTime, note
+  };
+  if (existing >= 0) { S.log[existing] = entry; }
+  else { S.log.push(entry); S.days++; }
+  S.todayMood = null; S.todayVictory = null; S.todayCauses = []; S.todayTime = null;
+  document.getElementById('noteInput').value = '';
+  document.getElementById('fallSection').classList.remove('visible');
+  save();
+  render();
+  toast(t.saved);
+}
+
+function resetStreak() {
+  if (!confirm(t.confirmReset)) return;
+  S.days = 0;
+  S.todayMood = null; S.todayVictory = null; S.todayCauses = []; S.todayTime = null;
+  save();
+  render();
+  toast(t.resetDone);
+}
+
+// ─── HISTORIAL ───────────────────────────────────────────
+function renderHistorial() {
+  const c = document.getElementById('historialContent');
+  if (!S.log || S.log.length === 0) {
+    c.innerHTML = `<div class="empty-state">${t.emptyHist}</div>`;
+    return;
+  }
+  c.innerHTML = [...S.log].reverse().map(e => {
+    const tags = [];
+    if (e.mood) tags.push(`<span class="tag tag-green">${e.mood}</span>`);
+    if (e.victory) {
+      const cls = e.victory === 'victoria' ? 'tag-green' : e.victory === 'caida' ? 'tag-red' : 'tag-amber';
+      const lbl = e.victory === 'victoria' ? T[lang].vic : e.victory === 'caida' ? T[lang].fall : T[lang].none;
+      tags.push(`<span class="tag ${cls}">${lbl}</span>`);
+    }
+    if (e.causes && e.causes.length) tags.push(`<span class="tag tag-red">${e.causes.join(', ')}</span>`);
+    if (e.time) tags.push(`<span class="tag tag-amber">${e.time}</span>`);
+    return `<div class="log-entry">
+      <div class="log-header">
+        <div class="log-day">Día ${e.day}</div>
+        <div class="log-date">${e.date}</div>
+      </div>
+      ${tags.length ? `<div class="log-tags">${tags.join('')}</div>` : ''}
+      ${e.note ? `<div class="log-note">${e.note}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+// ─── PATRONES ────────────────────────────────────────────
+function renderPatrones() {
+  const c = document.getElementById('patronesContent');
+  const falls = (S.log || []).filter(e => e.victory === 'caida');
+  if (falls.length === 0) {
+    c.innerHTML = `<div class="empty-state">${t.emptyPat}</div>`;
+    return;
+  }
+  const causeCounts = {};
+  const timeCounts = {};
+  falls.forEach(e => {
+    (e.causes || []).forEach(ca => { causeCounts[ca] = (causeCounts[ca] || 0) + 1; });
+    if (e.time) timeCounts[e.time] = (timeCounts[e.time] || 0) + 1;
+  });
+  const maxC = Math.max(...Object.values(causeCounts), 1);
+  const maxT = Math.max(...Object.values(timeCounts), 1);
+
+  const causeRows = Object.entries(causeCounts).sort((a,b)=>b[1]-a[1]).map(([k,v]) =>
+    `<div class="pattern-bar-row">
+      <div class="pattern-bar-label">${k}</div>
+      <div class="pattern-bar-bg"><div class="pattern-bar-fill" style="width:${Math.round(v/maxC*100)}%"></div></div>
+      <div class="pattern-count">${v}</div>
+    </div>`).join('');
+
+  const timeRows = Object.entries(timeCounts).sort((a,b)=>b[1]-a[1]).map(([k,v]) =>
+    `<div class="pattern-bar-row">
+      <div class="pattern-bar-label">${k}</div>
+      <div class="pattern-bar-bg"><div class="pattern-bar-fill" style="width:${Math.round(v/maxT*100)}%"></div></div>
+      <div class="pattern-count">${v}</div>
+    </div>`).join('');
+
+  c.innerHTML = `
+    <div class="pattern-card">
+      <div class="pattern-title">${t.patTitle} (${falls.length} total)</div>
+      ${causeRows || '<div style="font-size:13px;color:var(--text3);">Sin datos</div>'}
+    </div>
+    <div class="pattern-card">
+      <div class="pattern-title">${t.patTime}</div>
+      ${timeRows || '<div style="font-size:13px;color:var(--text3);">Sin datos</div>'}
+    </div>`;
+}
+
+// ─── NAVIGATION ──────────────────────────────────────────
+function switchTab(tab) {
+  ['hoy','historial','patrones','identidad'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('nav-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'historial') renderHistorial();
+  if (tab === 'patrones') renderPatrones();
+}
+
+// ─── SETTINGS ────────────────────────────────────────────
+function openSettings() {
+  document.getElementById('screen-settings').classList.add('active');
+  document.getElementById('settings-day-input').value = S.days;
+}
+function closeSettings() {
+  document.getElementById('screen-settings').classList.remove('active');
+}
+function changeLang(l) {
+  lang = l; S.lang = l; t = T[l];
+  save();
+  applyLang();
+  render();
+}
+function setManualDay() {
+  const val = parseInt(document.getElementById('settings-day-input').value);
+  if (isNaN(val) || val < 0) return;
+  S.days = val;
+  save();
+  render();
+  toast(t.daySet);
+}
+function confirmReset() {
+  if (!confirm(t.confirmNuke)) return;
+  localStorage.removeItem('renovar_v1');
+  location.reload();
+}
+function exportData() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'renovar-export.json';
+  a.click();
+}
+
+// ─── VOICE ───────────────────────────────────────────────
+function toggleVoice() {
+  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    toast(t.recordNoSupport); return;
+  }
+  if (isRecording) { recognition && recognition.stop(); return; }
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  recognition = new SR();
+  recognition.lang = lang === 'es' ? 'es-PY' : lang === 'pt' ? 'pt-BR' : 'en-US';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  const btn = document.getElementById('voiceBtn');
+  const area = document.getElementById('noteInput');
+  const existing = area.value;
+  recognition.onstart = () => { isRecording = true; btn.classList.add('recording'); btn.textContent = '⏹'; toast(t.recording); };
+  recognition.onresult = (e) => {
+    let transcript = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      transcript += e.results[i][0].transcript;
+    }
+    area.value = existing + (existing ? ' ' : '') + transcript;
+  };
+  recognition.onend = () => { isRecording = false; btn.classList.remove('recording'); btn.textContent = '🎙'; toast(t.recordingDone); };
+  recognition.onerror = () => { isRecording = false; btn.classList.remove('recording'); btn.textContent = '🎙'; };
+  recognition.start();
+}
+
+// ─── UTILS ───────────────────────────────────────────────
+function save() { localStorage.setItem('renovar_v1', JSON.stringify(S)); }
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ─── BOOT ────────────────────────────────────────────────
+if (S.onboarded) {
+  lang = S.lang || 'es';
+  t = T[lang];
+  showApp();
+} else {
+  document.getElementById('screen-onboarding').classList.add('active');
+}
+</script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js")}</script>
+</body>
+</html>
