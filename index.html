@@ -188,22 +188,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .settings-day-input { width: 70px; padding: 8px 10px; background: var(--card2); border: 0.5px solid var(--greenborder); border-radius: var(--radius-xs); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; text-align: center; }
 .settings-day-btn { padding: 8px 14px; background: var(--green); border: none; border-radius: var(--radius-xs); color: #0f1a14; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; }
 
+/* LOGIN */
+#screen-login { background: var(--bg); justify-content: center; align-items: center; padding: 2rem; }
+.login-inner { max-width: 320px; width: 100%; }
+.login-logo { font-family: 'Playfair Display', serif; font-size: 48px; color: var(--green); margin-bottom: 0.25rem; }
+.login-sub { font-size: 12px; color: var(--text3); margin-bottom: 2.5rem; letter-spacing: 0.1em; text-transform: uppercase; }
+.login-field { width: 100%; padding: 12px 16px; background: var(--card); border: 0.5px solid var(--greenborder); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; margin-bottom: 12px; }
+.login-field::placeholder { color: var(--text3); }
+.login-status { font-size: 13px; color: var(--red); margin-bottom: 10px; min-height: 18px; }
+
 /* TOAST */
 .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); border: 0.5px solid var(--greenborder); border-radius: var(--radius-sm); padding: 10px 20px; font-size: 13px; color: var(--green); opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* LOGIN */
-#screen-login { background: var(--bg); justify-content: center; align-items: center; padding: 2rem; }
-.login-inner { max-width: 320px; width: 100%; text-align: center; }
-.login-logo { font-family: 'Playfair Display', serif; font-size: 52px; color: var(--green); margin-bottom: 0.5rem; }
-.login-tagline { font-size: 12px; color: var(--text3); margin-bottom: 3rem; letter-spacing: 0.12em; text-transform: uppercase; }
-.btn-google { width: 100%; padding: 14px 20px; background: #fff; border: none; border-radius: var(--radius-sm); color: #1f1f1f; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: opacity 0.2s; }
-.btn-google:active { opacity: 0.85; }
-.login-status { font-size: 13px; color: var(--text3); margin-top: 1rem; min-height: 20px; }
-
-/* AVATAR */
-.topbar-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1.5px solid var(--greenborder); cursor: pointer; display: none; }
-.topbar-avatar.visible { display: block; }
 </style>
 </head>
 <body>
@@ -212,12 +209,11 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="screen active" id="screen-login">
   <div class="login-inner">
     <div class="login-logo">Renovar</div>
-    <div class="login-tagline">Tu camino, día a día</div>
-    <button class="btn-google" onclick="signInWithGoogle()">
-      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908C16.657 14.013 17.64 11.705 17.64 9.2z"/><path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/><path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z"/></svg>
-      Entrar con Google
-    </button>
+    <div class="login-sub">Tu camino, día a día</div>
+    <input class="login-field" type="email" id="loginEmail" placeholder="Email" value="lucianobritez019@gmail.com"/>
+    <input class="login-field" type="password" id="loginPassword" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()"/>
     <div class="login-status" id="loginStatus"></div>
+    <button class="btn-main" onclick="doLogin()">Entrar</button>
   </div>
 </div>
 
@@ -245,10 +241,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="screen" id="screen-app">
   <div class="topbar">
     <div class="topbar-title">Renovar</div>
-    <div style="display:flex;gap:8px;align-items:center;">
-      <img class="topbar-avatar" id="topbarAvatar" onclick="openSettings()" alt=""/>
-      <div class="topbar-settings" id="topbarSettingsBtn" onclick="openSettings()">⚙</div>
-    </div>
+    <div class="topbar-settings" onclick="openSettings()">⚙</div>
   </div>
   <div class="scroll-area">
 
@@ -399,16 +392,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       </div>
       <div class="settings-item" style="cursor:pointer;" onclick="confirmReset()">
         <div class="settings-item-label" style="color:var(--red);" id="set-reset-label">Borrar todos los datos</div>
-        <div class="settings-item-value">→</div>
-      </div>
-    </div>
-    <div class="settings-section">
-      <div class="settings-section-title">Cuenta</div>
-      <div class="settings-item" id="settingsAccountItem">
-        <div class="settings-item-label" id="settingsAccountEmail" style="font-size:13px;color:var(--text2);"></div>
-      </div>
-      <div class="settings-item" style="cursor:pointer;" onclick="handleSignOut()">
-        <div class="settings-item-label" style="color:var(--red);">Cerrar sesión</div>
         <div class="settings-item-value">→</div>
       </div>
     </div>
@@ -1084,7 +1067,9 @@ function toggleVoice() {
 // ─── UTILS ───────────────────────────────────────────────
 function save() {
   localStorage.setItem('renovar_v1', JSON.stringify(S));
-  saveToFirestore();
+  if (window._fbDb && window._fbUid) {
+    window._fbDb.doc(`users/${window._fbUid}/data/renovar`).set(S).catch(() => {});
+  }
 }
 
 function toast(msg) {
@@ -1095,123 +1080,63 @@ function toast(msg) {
 }
 
 // ─── FIREBASE ────────────────────────────────────────────
-let currentUser = null;
-let db = null;
-let auth = null;
-
-function initFirebase() {
-  const firebaseConfig = {
-    apiKey: "AIzaSyBKhHlG5zsu6Cu7pR7NOdZTkrMGrAkqjJs",
-    authDomain: "renovar-app-fcd86.firebaseapp.com",
-    projectId: "renovar-app-fcd86",
-    storageBucket: "renovar-app-fcd86.firebasestorage.app",
-    messagingSenderId: "603571621294",
-    appId: "1:603571621294:web:4a2aaf0d533e2c52bd4c3f"
-  };
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-  auth = firebase.auth();
-  db = firebase.firestore();
-
-  // Handle redirect result (comes back after signInWithRedirect)
-  auth.getRedirectResult().then(async (result) => {
-    if (result && result.user) {
-      document.getElementById('loginStatus').textContent = '';
-    }
-  }).catch((e) => {
-    document.getElementById('loginStatus').textContent = 'Error al iniciar sesión. Intentá de nuevo.';
-    console.error('[Renovar] Redirect result error:', e);
-  });
-
-  auth.onAuthStateChanged(async (user) => {
-    if (user) {
-      currentUser = user;
-      document.getElementById('screen-login').classList.remove('active');
-      // Show avatar
-      const avatar = document.getElementById('topbarAvatar');
-      if (user.photoURL) {
-        avatar.src = user.photoURL;
-        avatar.classList.add('visible');
-        document.getElementById('topbarSettingsBtn').style.display = 'none';
-      }
-      // Show account email in settings
-      const emailEl = document.getElementById('settingsAccountEmail');
-      if (emailEl) emailEl.textContent = user.displayName ? `${user.displayName} · ${user.email}` : user.email;
-      // Load data
-      await loadFromFirestore();
-      lang = S.lang || 'es';
-      t = T[lang];
-      if (S.onboarded) {
-        showApp();
-      } else {
-        document.getElementById('screen-onboarding').classList.add('active');
-      }
-    } else {
-      document.getElementById('screen-login').classList.add('active');
-    }
-  });
-}
-
-function signInWithGoogle() {
-  const statusEl = document.getElementById('loginStatus');
-  try {
-    if (!auth) { statusEl.textContent = 'Error: Firebase no cargó. Recargá la página.'; return; }
-    statusEl.textContent = 'Redirigiendo a Google...';
-    const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithRedirect(provider).catch((e) => {
-      statusEl.textContent = 'Error: ' + (e.message || e.code || 'desconocido');
-      console.error('[Renovar] Auth error:', e);
+function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPassword').value;
+  const status = document.getElementById('loginStatus');
+  const btn = document.querySelector('#screen-login .btn-main');
+  status.textContent = '';
+  btn.textContent = 'Entrando...';
+  btn.disabled = true;
+  firebase.auth().signInWithEmailAndPassword(email, pw)
+    .catch(e => {
+      status.textContent = 'Contraseña incorrecta.';
+      btn.textContent = 'Entrar';
+      btn.disabled = false;
     });
-  } catch(e) {
-    statusEl.textContent = 'Error: ' + (e.message || String(e));
-    console.error('[Renovar] signInWithGoogle error:', e);
-  }
 }
 
-async function handleSignOut() {
-  if (!confirm('¿Cerrar sesión?')) return;
-  await auth.signOut();
-  location.reload();
-}
-
-function fsPath() { return `users/${currentUser.uid}/data/renovar`; }
-
-function saveToFirestore() {
-  if (!currentUser || !db) return;
-  db.doc(fsPath()).set(S).catch(e => console.warn('[Renovar] Firestore save:', e));
-}
-
-async function loadFromFirestore() {
-  if (!currentUser || !db) return;
-  try {
-    const snap = await db.doc(fsPath()).get();
+function bootApp(uid) {
+  window._fbUid = uid;
+  window._fbDb = firebase.firestore();
+  window._fbDb.doc(`users/${uid}/data/renovar`).get().then(snap => {
     if (snap.exists) {
       const data = snap.data();
       S = { ...S, ...data };
-    } else {
-      // No cloud data — upload local data if exists
-      const local = JSON.parse(localStorage.getItem('renovar_v1') || 'null');
-      if (local && local.onboarded) {
-        S = local;
-        db.doc(fsPath()).set(S).catch(() => {});
-      }
+      if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
+      if (!S.todayMoods) S.todayMoods = [];
+      if (!S.todayActions) S.todayActions = [];
+      localStorage.setItem('renovar_v1', JSON.stringify(S));
+    } else if (S.onboarded) {
+      // upload existing local data
+      window._fbDb.doc(`users/${uid}/data/renovar`).set(S).catch(() => {});
     }
-    // normalize
-    if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
-    if (!S.todayMoods) S.todayMoods = [];
-    if (!S.todayActions) S.todayActions = [];
-    localStorage.setItem('renovar_v1', JSON.stringify(S));
-  } catch(e) {
-    console.warn('[Renovar] Firestore load:', e);
-  }
+    document.getElementById('screen-login').classList.remove('active');
+    lang = S.lang || 'es'; t = T[lang];
+    if (S.onboarded) { showApp(); }
+    else { document.getElementById('screen-onboarding').classList.add('active'); }
+  }).catch(() => {
+    document.getElementById('screen-login').classList.remove('active');
+    lang = S.lang || 'es'; t = T[lang];
+    if (S.onboarded) { showApp(); }
+    else { document.getElementById('screen-onboarding').classList.add('active'); }
+  });
 }
 
 // ─── BOOT ────────────────────────────────────────────────
-try {
-  initFirebase();
-} catch(e) {
-  document.getElementById('loginStatus').textContent = 'Error al iniciar Firebase: ' + (e.message || String(e));
-  console.error('[Renovar] initFirebase error:', e);
-}
+const _fbConfig = {
+  apiKey: "AIzaSyBKhHlG5zsu6Cu7pR7NOdZTkrMGrAkqjJs",
+  authDomain: "renovar-app-fcd86.firebaseapp.com",
+  projectId: "renovar-app-fcd86",
+  storageBucket: "renovar-app-fcd86.firebasestorage.app",
+  messagingSenderId: "603571621294",
+  appId: "1:603571621294:web:4a2aaf0d533e2c52bd4c3f"
+};
+if (!firebase.apps.length) firebase.initializeApp(_fbConfig);
+firebase.auth().onAuthStateChanged(user => {
+  if (user) { bootApp(user.uid); }
+  else { document.getElementById('screen-login').classList.add('active'); }
+});
 </script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js")}</script>
 </body>
