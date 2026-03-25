@@ -1112,6 +1112,16 @@ function initFirebase() {
   auth = firebase.auth();
   db = firebase.firestore();
 
+  // Handle redirect result (comes back after signInWithRedirect)
+  auth.getRedirectResult().then(async (result) => {
+    if (result && result.user) {
+      document.getElementById('loginStatus').textContent = '';
+    }
+  }).catch((e) => {
+    document.getElementById('loginStatus').textContent = 'Error al iniciar sesión. Intentá de nuevo.';
+    console.error('[Renovar] Redirect result error:', e);
+  });
+
   auth.onAuthStateChanged(async (user) => {
     if (user) {
       currentUser = user;
@@ -1141,16 +1151,14 @@ function initFirebase() {
   });
 }
 
-async function signInWithGoogle() {
+function signInWithGoogle() {
   const statusEl = document.getElementById('loginStatus');
-  statusEl.textContent = 'Iniciando sesión...';
+  statusEl.textContent = 'Redirigiendo a Google...';
   const provider = new firebase.auth.GoogleAuthProvider();
-  try {
-    await auth.signInWithPopup(provider);
-  } catch(e) {
+  auth.signInWithRedirect(provider).catch((e) => {
     statusEl.textContent = 'No se pudo iniciar sesión. Intentá de nuevo.';
     console.error('[Renovar] Auth error:', e);
-  }
+  });
 }
 
 async function handleSignOut() {
