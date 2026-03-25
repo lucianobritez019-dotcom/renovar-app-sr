@@ -1153,12 +1153,18 @@ function initFirebase() {
 
 function signInWithGoogle() {
   const statusEl = document.getElementById('loginStatus');
-  statusEl.textContent = 'Redirigiendo a Google...';
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithRedirect(provider).catch((e) => {
-    statusEl.textContent = 'No se pudo iniciar sesión. Intentá de nuevo.';
-    console.error('[Renovar] Auth error:', e);
-  });
+  try {
+    if (!auth) { statusEl.textContent = 'Error: Firebase no cargó. Recargá la página.'; return; }
+    statusEl.textContent = 'Redirigiendo a Google...';
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithRedirect(provider).catch((e) => {
+      statusEl.textContent = 'Error: ' + (e.message || e.code || 'desconocido');
+      console.error('[Renovar] Auth error:', e);
+    });
+  } catch(e) {
+    statusEl.textContent = 'Error: ' + (e.message || String(e));
+    console.error('[Renovar] signInWithGoogle error:', e);
+  }
 }
 
 async function handleSignOut() {
@@ -1200,7 +1206,12 @@ async function loadFromFirestore() {
 }
 
 // ─── BOOT ────────────────────────────────────────────────
-initFirebase();
+try {
+  initFirebase();
+} catch(e) {
+  document.getElementById('loginStatus').textContent = 'Error al iniciar Firebase: ' + (e.message || String(e));
+  console.error('[Renovar] initFirebase error:', e);
+}
 </script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js")}</script>
 </body>
