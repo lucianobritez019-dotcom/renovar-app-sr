@@ -395,14 +395,19 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="settings-item-value">→</div>
       </div>
     </div>
+    <div class="settings-section">
+      <div class="settings-section-title">Cuenta</div>
+      <div class="settings-item" style="cursor:pointer;" onclick="window._sb&&window._sb.auth.signOut()">
+        <div class="settings-item-label" style="color:var(--red);">Cerrar sesión</div>
+        <div class="settings-item-value">→</div>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 // ─── I18N ───────────────────────────────────────────────
 const T = {
@@ -1067,9 +1072,14 @@ function toggleVoice() {
 // ─── UTILS ───────────────────────────────────────────────
 function save() {
   localStorage.setItem('renovar_v1', JSON.stringify(S));
-  if (window._fbDb && window._fbUid) {
-    window._fbDb.doc(`users/${window._fbUid}/data/renovar`).set(S).catch(() => {});
-  }
+  syncToSupabase();
+}
+
+async function syncToSupabase() {
+  if (!window._sb) return;
+  const { data: { user } } = await window._sb.auth.getUser();
+  if (!user) return;
+  window._sb.from('renovar_data').upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() }).then(() => {});
 }
 
 function toast(msg) {
@@ -1079,8 +1089,11 @@ function toast(msg) {
   setTimeout(() => el.classList.remove('show'), 2200);
 }
 
-// ─── FIREBASE ────────────────────────────────────────────
-function doLogin() {
+// ─── SUPABASE AUTH ────────────────────────────────────────
+const SUPA_URL = 'https://vdgvncfujtfnnwmimtry.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkZ3ZuY2Z1anRmbm53bWltdHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDg3MDMsImV4cCI6MjA4OTU4NDcwM30.u_5VTYmvCnykeFQj-nU6rvxLOdSHVfcsfhdnHM9h6dc';
+
+async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPassword').value;
   const status = document.getElementById('loginStatus');
@@ -1088,55 +1101,42 @@ function doLogin() {
   status.textContent = '';
   btn.textContent = 'Entrando...';
   btn.disabled = true;
-  firebase.auth().signInWithEmailAndPassword(email, pw)
-    .catch(e => {
-      status.textContent = 'Contraseña incorrecta.';
-      btn.textContent = 'Entrar';
-      btn.disabled = false;
-    });
+  const { error } = await window._sb.auth.signInWithPassword({ email, password: pw });
+  if (error) {
+    status.textContent = 'Contraseña incorrecta.';
+    btn.textContent = 'Entrar';
+    btn.disabled = false;
+  }
 }
 
-function bootApp(uid) {
-  window._fbUid = uid;
-  window._fbDb = firebase.firestore();
-  window._fbDb.doc(`users/${uid}/data/renovar`).get().then(snap => {
-    if (snap.exists) {
-      const data = snap.data();
-      S = { ...S, ...data };
-      if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
-      if (!S.todayMoods) S.todayMoods = [];
-      if (!S.todayActions) S.todayActions = [];
-      localStorage.setItem('renovar_v1', JSON.stringify(S));
-    } else if (S.onboarded) {
-      // upload existing local data
-      window._fbDb.doc(`users/${uid}/data/renovar`).set(S).catch(() => {});
-    }
-    document.getElementById('screen-login').classList.remove('active');
-    lang = S.lang || 'es'; t = T[lang];
-    if (S.onboarded) { showApp(); }
-    else { document.getElementById('screen-onboarding').classList.add('active'); }
-  }).catch(() => {
-    document.getElementById('screen-login').classList.remove('active');
-    lang = S.lang || 'es'; t = T[lang];
-    if (S.onboarded) { showApp(); }
-    else { document.getElementById('screen-onboarding').classList.add('active'); }
-  });
+async function bootApp() {
+  const { data: { user } } = await window._sb.auth.getUser();
+  if (!user) { document.getElementById('screen-login').classList.add('active'); return; }
+  // Load from Supabase
+  const { data } = await window._sb.from('renovar_data').select('data').eq('user_id', user.id).maybeSingle();
+  if (data) {
+    S = { ...S, ...data.data };
+  } else if (S.onboarded) {
+    // migrate local data
+    await window._sb.from('renovar_data').insert({ user_id: user.id, data: S });
+  }
+  if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
+  if (!S.todayMoods) S.todayMoods = [];
+  if (!S.todayActions) S.todayActions = [];
+  localStorage.setItem('renovar_v1', JSON.stringify(S));
+  document.getElementById('screen-login').classList.remove('active');
+  lang = S.lang || 'es'; t = T[lang];
+  if (S.onboarded) { showApp(); }
+  else { document.getElementById('screen-onboarding').classList.add('active'); }
 }
 
 // ─── BOOT ────────────────────────────────────────────────
-const _fbConfig = {
-  apiKey: "AIzaSyBKhHlG5zsu6Cu7pR7NOdZTkrMGrAkqjJs",
-  authDomain: "renovar-app-fcd86.firebaseapp.com",
-  projectId: "renovar-app-fcd86",
-  storageBucket: "renovar-app-fcd86.firebasestorage.app",
-  messagingSenderId: "603571621294",
-  appId: "1:603571621294:web:4a2aaf0d533e2c52bd4c3f"
-};
-if (!firebase.apps.length) firebase.initializeApp(_fbConfig);
-firebase.auth().onAuthStateChanged(user => {
-  if (user) { bootApp(user.uid); }
-  else { document.getElementById('screen-login').classList.add('active'); }
+window._sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+window._sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN') bootApp();
+  if (event === 'SIGNED_OUT') { document.getElementById('screen-login').classList.add('active'); }
 });
+bootApp();
 </script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("/sw.js")}</script>
 </body>
