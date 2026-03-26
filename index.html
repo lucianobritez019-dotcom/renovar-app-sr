@@ -201,6 +201,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .toast { position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); border: 0.5px solid var(--greenborder); border-radius: var(--radius-sm); padding: 10px 20px; font-size: 13px; color: var(--green); opacity: 0; transition: all 0.3s; pointer-events: none; z-index: 999; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+
+/* AUTH EXTRAS */
+.pw-wrap { position: relative; margin-bottom: 12px; }
+.pw-wrap .login-field { margin-bottom: 0; width: 100%; box-sizing: border-box; padding-right: 44px; }
+.pw-eye { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text3); font-size: 18px; padding: 0; line-height: 1; }
+.pw-eye:hover { color: var(--green); }
+.auth-links { display: flex; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 6px; }
+.auth-link { color: var(--text3); font-size: 13px; text-decoration: none; transition: color 0.2s; }
+.auth-link:hover { color: var(--green); }
 </style>
 </head>
 <body>
@@ -210,10 +219,54 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   <div class="login-inner">
     <div class="login-logo">Renovar</div>
     <div class="login-sub">Tu camino, día a día</div>
-    <input class="login-field" type="email" id="loginEmail" placeholder="Email" value="lucianobritez019@gmail.com"/>
-    <input class="login-field" type="password" id="loginPassword" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <input class="login-field" type="email" id="loginEmail" placeholder="Email"/>
+    <div class="pw-wrap">
+      <input class="login-field" type="password" id="loginPassword" placeholder="Contraseña" onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="pw-eye" type="button" onclick="togglePw('loginPassword',this)" aria-label="Ver contraseña">👁️</button>
+    </div>
     <div class="login-status" id="loginStatus"></div>
     <button class="btn-main" onclick="doLogin()">Entrar</button>
+    <div class="auth-links">
+      <a class="auth-link" href="#" onclick="showAuthScreen('screen-forgot');return false;">¿Olvidaste tu contraseña?</a>
+      <a class="auth-link" href="#" onclick="showAuthScreen('screen-register');return false;">Crear cuenta</a>
+    </div>
+  </div>
+</div>
+
+<!-- REGISTRO -->
+<div class="screen" id="screen-register">
+  <div class="login-inner">
+    <div class="login-logo">Renovar</div>
+    <div class="login-sub">Crear cuenta</div>
+    <input class="login-field" type="email" id="regEmail" placeholder="Email"/>
+    <div class="pw-wrap">
+      <input class="login-field" type="password" id="regPassword" placeholder="Contraseña (mín. 6 caracteres)"/>
+      <button class="pw-eye" type="button" onclick="togglePw('regPassword',this)" aria-label="Ver contraseña">👁️</button>
+    </div>
+    <div class="pw-wrap">
+      <input class="login-field" type="password" id="regPassword2" placeholder="Repetir contraseña" onkeydown="if(event.key==='Enter')doRegister()"/>
+      <button class="pw-eye" type="button" onclick="togglePw('regPassword2',this)" aria-label="Ver contraseña">👁️</button>
+    </div>
+    <div class="login-status" id="regStatus"></div>
+    <button class="btn-main" onclick="doRegister()">Crear cuenta</button>
+    <div class="auth-links" style="justify-content:center;">
+      <a class="auth-link" href="#" onclick="showAuthScreen('screen-login');return false;">Ya tengo cuenta → Iniciar sesión</a>
+    </div>
+  </div>
+</div>
+
+<!-- RECUPERAR CONTRASENA -->
+<div class="screen" id="screen-forgot">
+  <div class="login-inner">
+    <div class="login-logo">Renovar</div>
+    <div class="login-sub">Recuperar contraseña</div>
+    <p style="color:var(--text2);font-size:13px;margin-bottom:1.5rem;line-height:1.5;">Te enviamos un link a tu email para restablecer tu contraseña.</p>
+    <input class="login-field" type="email" id="forgotEmail" placeholder="Email"/>
+    <div class="login-status" id="forgotStatus"></div>
+    <button class="btn-main" onclick="doForgotPassword()">Enviar email</button>
+    <div class="auth-links" style="justify-content:center;">
+      <a class="auth-link" href="#" onclick="showAuthScreen('screen-login');return false;">← Volver al inicio</a>
+    </div>
   </div>
 </div>
 
@@ -1093,6 +1146,72 @@ function toast(msg) {
 const SUPA_URL = 'https://vdgvncfujtfnnwmimtry.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZkZ3ZuY2Z1anRmbm53bWltdHJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQwMDg3MDMsImV4cCI6MjA4OTU4NDcwM30.u_5VTYmvCnykeFQj-nU6rvxLOdSHVfcsfhdnHM9h6dc';
 
+
+function showAuthScreen(id) {
+  ['screen-login','screen-register','screen-forgot'].forEach(function(s) {
+    var el = document.getElementById(s);
+    if (el) el.classList.remove('active');
+  });
+  document.getElementById(id).classList.add('active');
+}
+
+function togglePw(inputId, btn) {
+  var input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
+}
+
+async function doRegister() {
+  var email = document.getElementById('regEmail').value.trim();
+  var pw = document.getElementById('regPassword').value;
+  var pw2 = document.getElementById('regPassword2').value;
+  var status = document.getElementById('regStatus');
+  var btn = document.querySelector('#screen-register .btn-main');
+  status.style.color = 'var(--red)';
+  status.textContent = '';
+  if (!email || !pw) { status.textContent = 'Completá todos los campos.'; return; }
+  if (pw !== pw2) { status.textContent = 'Las contraseñas no coinciden.'; return; }
+  if (pw.length < 6) { status.textContent = 'La contraseña debe tener al menos 6 caracteres.'; return; }
+  btn.textContent = 'Creando...';
+  btn.disabled = true;
+  var result = await window._sb.auth.signUp({ email: email, password: pw });
+  btn.textContent = 'Crear cuenta';
+  btn.disabled = false;
+  if (result.error) {
+    status.textContent = result.error.message || 'Error al crear cuenta.';
+  } else {
+    status.style.color = 'var(--green)';
+    status.textContent = '¡Cuenta creada! Revisá tu email para confirmar.';
+  }
+}
+
+async function doForgotPassword() {
+  var email = document.getElementById('forgotEmail').value.trim();
+  var status = document.getElementById('forgotStatus');
+  var btn = document.querySelector('#screen-forgot .btn-main');
+  status.textContent = '';
+  if (!email) { status.style.color = 'var(--red)'; status.textContent = 'Ingresá tu email.'; return; }
+  btn.textContent = 'Enviando...';
+  btn.disabled = true;
+  var result = await window._sb.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://lucianobritez019-dotcom.github.io/renovar-app-sr/'
+  });
+  btn.textContent = 'Enviar email';
+  btn.disabled = false;
+  if (result.error) {
+    status.style.color = 'var(--red)';
+    status.textContent = result.error.message || 'Error al enviar email.';
+  } else {
+    status.style.color = 'var(--green)';
+    status.textContent = '¡Email enviado! Revisá tu bandeja de entrada.';
+  }
+}
+
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPassword').value;
@@ -1134,7 +1253,7 @@ async function bootApp() {
 window._sb = supabase.createClient(SUPA_URL, SUPA_KEY);
 window._sb.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN') bootApp();
-  if (event === 'SIGNED_OUT') { document.getElementById('screen-login').classList.add('active'); }
+  if (event === 'SIGNED_OUT') { showAuthScreen('screen-login'); }
 });
 bootApp();
 </script>
