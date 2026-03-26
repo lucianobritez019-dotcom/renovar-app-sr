@@ -92,9 +92,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
 /* VICTORY */
 .vic-row { display: flex; gap: 8px; }
-.vic-btn { flex: 1; padding: 11px 6px; border-radius: var(--radius-xs); border: 0.5px solid rgba(255,255,255,0.07); background: var(--card2); font-size: 12px; color: var(--text2); text-align: center; cursor: pointer; transition: all 0.15s; }
+.vic-btn { flex: 1; padding: 11px 6px; border-radius: var(--radius-xs); border: 1.5px solid rgba(255,255,255,0.07); background: var(--card2); font-size: 12px; color: var(--text2); text-align: center; cursor: pointer; transition: all 0.15s; }
 .vic-btn.win { background: var(--greenfaint); border-color: var(--greenborder); color: var(--green); }
 .vic-btn.loss { background: var(--redfaint); border-color: var(--redborder); color: var(--red); }
+.vic-btn.sel { border-width: 2px; box-shadow: 0 0 0 2px rgba(74,222,128,0.35); font-weight: 600; }
+.vic-btn.loss.sel { box-shadow: 0 0 0 2px rgba(248,113,113,0.35); }
+.vic-btn.neutral.sel { box-shadow: 0 0 0 2px rgba(251,191,36,0.35); }
 .vic-btn.neutral { background: var(--amberfaint); border-color: rgba(251,191,36,0.25); color: var(--amber); }
 
 /* FALL ANALYSIS */
@@ -146,11 +149,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .tab-page.active { display: block; }
 
 /* HISTORIAL */
-.log-entry { background: var(--card); border: 0.5px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; }
-.log-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.log-entry { background: var(--card); border: 0.5px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
+.log-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; cursor: pointer; user-select: none; }
+.log-header:active { background: var(--card2); }
 .log-day { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--green); }
+.log-meta { display: flex; align-items: center; gap: 8px; }
 .log-date { font-size: 11px; color: var(--text3); }
-.log-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.log-count { font-size: 11px; color: var(--text3); background: var(--card2); padding: 2px 7px; border-radius: 10px; }
+.log-chevron { font-size: 10px; color: var(--text3); transition: transform 0.2s; margin-left: 4px; }
+.log-entry.open .log-chevron { transform: rotate(180deg); }
+.log-body { display: none; border-top: 0.5px solid rgba(255,255,255,0.05); }
+.log-entry.open .log-body { display: block; }
+.log-subentry { padding: 10px 14px; border-bottom: 0.5px solid rgba(255,255,255,0.04); }
+.log-subentry:last-child { border-bottom: none; }
+.log-subtime { font-size: 11px; color: var(--green); font-weight: 500; margin-bottom: 5px; letter-spacing: 0.05em; }
+.log-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 5px; }
 .tag { font-size: 11px; padding: 3px 8px; border-radius: 20px; }
 .tag-green { background: var(--greenfaint); color: var(--green); border: 0.5px solid var(--greenborder); }
 .tag-red { background: var(--redfaint); color: var(--red); border: 0.5px solid var(--redborder); }
@@ -943,11 +956,11 @@ function updateHadTemButtons(had) {
   const btnNo = document.getElementById('btn-nohad');
   if (!btnHad || !btnNo) return;
   if (had === true) {
-    btnHad.classList.add('win'); btnNo.classList.remove('win');
+    btnHad.classList.add('win', 'sel'); btnNo.classList.remove('win', 'sel');
   } else if (had === false) {
-    btnNo.classList.add('win'); btnHad.classList.remove('win');
+    btnNo.classList.add('win', 'sel'); btnHad.classList.remove('win', 'sel');
   } else {
-    btnHad.classList.remove('win'); btnNo.classList.remove('win');
+    btnHad.classList.remove('win', 'sel'); btnNo.classList.remove('win', 'sel');
   }
 }
 
@@ -1034,17 +1047,18 @@ function selectTime(tm) {
 
 function saveDay() {
   const note = document.getElementById('noteInput').value.trim();
-  const today = new Date().toLocaleDateString('es-PY');
+  const now = new Date();
+  const today = now.toLocaleDateString('es-PY');
+  const pad = n => n < 10 ? '0'+n : ''+n;
+  const savedAt = pad(now.getHours()) + ':' + pad(now.getMinutes());
   S.log = S.log || [];
-  const existing = S.log.findIndex(e => e.date === today);
   const entry = {
-    day: currentStreakDay(), date: today, lang,
+    day: currentStreakDay(), date: today, savedAt, lang,
     moods: [...(S.todayMoods||[])], victory: S.todayVictory,
     causes: [...(S.todayCauses || [])], time: S.todayTime,
     actions: [...(S.todayActions||[])], note
   };
-  if (existing >= 0) { S.log[existing] = entry; }
-  else { S.log.push(entry); }
+  S.log.push(entry);
   S.todayMoods = []; S.todayVictory = null; S.todayCauses = []; S.todayTime = null; S.todayActions = [];
   document.getElementById('noteInput').value = '';
   document.getElementById('hadTemSection').classList.remove('visible');
@@ -1067,30 +1081,59 @@ function resetStreak() {
 }
 
 // ─── HISTORIAL ───────────────────────────────────────────
+function entryTags(e) {
+  const tags = [];
+  const moodArr = e.moods || (e.mood ? [e.mood] : []);
+  moodArr.forEach(m => tags.push(`<span class="tag tag-green">${m}</span>`));
+  if (e.victory) {
+    const cls = e.victory === 'victoria' ? 'tag-green' : e.victory === 'caida' ? 'tag-red' : 'tag-amber';
+    const lbl = e.victory === 'victoria' ? T[lang].vic : e.victory === 'caida' ? T[lang].fall : T[lang].none;
+    tags.push(`<span class="tag ${cls}">${lbl}</span>`);
+  }
+  if (e.causes && e.causes.length) tags.push(`<span class="tag tag-red">${e.causes.join(', ')}</span>`);
+  if (e.time) tags.push(`<span class="tag tag-amber">${e.time}</span>`);
+  return tags;
+}
+
+function toggleLogEntry(el) {
+  el.closest('.log-entry').classList.toggle('open');
+}
+
 function renderHistorial() {
   const c = document.getElementById('historialContent');
   if (!S.log || S.log.length === 0) {
     c.innerHTML = `<div class="empty-state">${t.emptyHist}</div>`;
     return;
   }
-  c.innerHTML = [...S.log].reverse().map(e => {
-    const tags = [];
-    const moodArr = e.moods || (e.mood ? [e.mood] : []);
-    moodArr.forEach(m => tags.push(`<span class="tag tag-green">${m}</span>`));
-    if (e.victory) {
-      const cls = e.victory === 'victoria' ? 'tag-green' : e.victory === 'caida' ? 'tag-red' : 'tag-amber';
-      const lbl = e.victory === 'victoria' ? T[lang].vic : e.victory === 'caida' ? T[lang].fall : T[lang].none;
-      tags.push(`<span class="tag ${cls}">${lbl}</span>`);
-    }
-    if (e.causes && e.causes.length) tags.push(`<span class="tag tag-red">${e.causes.join(', ')}</span>`);
-    if (e.time) tags.push(`<span class="tag tag-amber">${e.time}</span>`);
+  // Group entries by date (key = date string), preserving order
+  const groups = {};
+  const groupOrder = [];
+  [...S.log].reverse().forEach(e => {
+    if (!groups[e.date]) { groups[e.date] = { day: e.day, date: e.date, entries: [] }; groupOrder.push(e.date); }
+    groups[e.date].entries.push(e);
+  });
+  c.innerHTML = groupOrder.map(dateKey => {
+    const g = groups[dateKey];
+    const subentries = g.entries.map(e => {
+      const tags = entryTags(e);
+      const timeLabel = e.savedAt ? `🕐 ${e.savedAt}` : '';
+      return `<div class="log-subentry">
+        ${timeLabel ? `<div class="log-subtime">${timeLabel}</div>` : ''}
+        ${tags.length ? `<div class="log-tags">${tags.join('')}</div>` : ''}
+        ${e.note ? `<div class="log-note">${e.note}</div>` : ''}
+      </div>`;
+    }).join('');
+    const count = g.entries.length;
     return `<div class="log-entry">
-      <div class="log-header">
-        <div class="log-day">Día ${e.day}</div>
-        <div class="log-date">${e.date}</div>
+      <div class="log-header" onclick="toggleLogEntry(this)">
+        <div class="log-day">Día ${g.day}</div>
+        <div class="log-meta">
+          ${count > 1 ? `<span class="log-count">${count} registros</span>` : ''}
+          <div class="log-date">${g.date}</div>
+          <div class="log-chevron">▼</div>
+        </div>
       </div>
-      ${tags.length ? `<div class="log-tags">${tags.join('')}</div>` : ''}
-      ${e.note ? `<div class="log-note">${e.note}</div>` : ''}
+      <div class="log-body">${subentries}</div>
     </div>`;
   }).join('');
 }
