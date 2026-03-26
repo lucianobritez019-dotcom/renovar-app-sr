@@ -906,7 +906,7 @@ function renderTips() {
     card.classList.remove('visible');
     return;
   }
-  content.innerHTML = unique.map(tip => ).join('');
+  content.innerHTML = unique.map(tip => `<div class="tip-item">${tip}</div>`).join('');
   card.classList.add('visible');
 }
 
