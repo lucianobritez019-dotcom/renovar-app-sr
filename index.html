@@ -678,6 +678,8 @@ function completeOnboarding() {
   const days = parseInt(document.getElementById('onb-days').value) || 0;
   S.lang = document.getElementById('onb-lang').value;
   S.days = days;
+  var d = new Date(); d.setDate(d.getDate() - days);
+  S.startDate = d.toISOString().slice(0, 10);
   S.onboarded = true;
   lang = S.lang;
   t = T[lang];
@@ -686,9 +688,32 @@ function completeOnboarding() {
 }
 
 // ─── APP INIT ────────────────────────────────────────────
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function initStartDate() {
+  if (!S.startDate) {
+    var d = new Date();
+    d.setDate(d.getDate() - (S.days || 0));
+    S.startDate = d.toISOString().slice(0, 10);
+    save();
+  }
+}
+
+function currentStreakDay() {
+  if (!S.startDate) return S.days || 0;
+  var start = new Date(S.startDate + 'T00:00:00');
+  var today = new Date();
+  today.setHours(0, 0, 0, 0);
+  var diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  return Math.max(diff, 0);
+}
+
 function showApp() {
   document.getElementById('screen-onboarding').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
+  initStartDate();
   applyLang();
   render();
 }
@@ -734,7 +759,7 @@ function applyLang() {
 }
 
 function render() {
-  const days = S.days;
+  const days = currentStreakDay();
   document.getElementById('dayNum').textContent = days;
   const v = VERSES[lang][days % VERSES[lang].length];
   document.getElementById('verseText').textContent = v.text;
@@ -954,13 +979,13 @@ function saveDay() {
   S.log = S.log || [];
   const existing = S.log.findIndex(e => e.date === today);
   const entry = {
-    day: S.days + 1, date: today, lang,
+    day: currentStreakDay(), date: today, lang,
     moods: [...(S.todayMoods||[])], victory: S.todayVictory,
     causes: [...(S.todayCauses || [])], time: S.todayTime,
     actions: [...(S.todayActions||[])], note
   };
   if (existing >= 0) { S.log[existing] = entry; }
-  else { S.log.push(entry); S.days++; }
+  else { S.log.push(entry); }
   S.todayMoods = []; S.todayVictory = null; S.todayCauses = []; S.todayTime = null; S.todayActions = [];
   document.getElementById('noteInput').value = '';
   document.getElementById('hadTemSection').classList.remove('visible');
@@ -973,6 +998,7 @@ function saveDay() {
 function resetStreak() {
   if (!confirm(t.confirmReset)) return;
   S.days = 0;
+  S.startDate = todayISO();
   S.todayMoods = []; S.todayVictory = null; S.todayCauses = []; S.todayTime = null; S.todayActions = [];
   save();
   render();
@@ -1078,6 +1104,8 @@ function setManualDay() {
   const val = parseInt(document.getElementById('settings-day-input').value);
   if (isNaN(val) || val < 0) return;
   S.days = val;
+  var d = new Date(); d.setDate(d.getDate() - val);
+  S.startDate = d.toISOString().slice(0, 10);
   save();
   render();
   toast(t.daySet);
