@@ -149,26 +149,32 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .tab-page.active { display: block; }
 
 /* HISTORIAL */
-.log-entry { background: var(--card); border: 0.5px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); margin-bottom: 8px; overflow: hidden; }
-.log-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; cursor: pointer; user-select: none; }
-.log-header:active { background: var(--card2); }
-.log-day { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--green); }
-.log-meta { display: flex; align-items: center; gap: 8px; }
-.log-date { font-size: 11px; color: var(--text3); }
-.log-count { font-size: 11px; color: var(--text3); background: var(--card2); padding: 2px 7px; border-radius: 10px; }
-.log-chevron { font-size: 10px; color: var(--text3); transition: transform 0.2s; margin-left: 4px; }
-.log-entry.open .log-chevron { transform: rotate(180deg); }
-.log-body { display: none; border-top: 0.5px solid rgba(255,255,255,0.05); }
-.log-entry.open .log-body { display: block; }
-.log-subentry { padding: 10px 14px; border-bottom: 0.5px solid rgba(255,255,255,0.04); }
-.log-subentry:last-child { border-bottom: none; }
-.log-subtime { font-size: 11px; color: var(--green); font-weight: 500; margin-bottom: 5px; letter-spacing: 0.05em; }
+.log-entry { background: var(--card); border: 0.5px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); margin-bottom: 8px; padding: 12px 14px; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; transition: background 0.15s; }
+.log-entry:active { background: var(--card2); }
+.log-entry-left { flex: 1; min-width: 0; }
+.log-day { font-family: 'Playfair Display', serif; font-size: 18px; color: var(--green); line-height: 1; }
+.log-date { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.log-preview { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 7px; }
+.log-entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; }
+.log-time { font-size: 13px; color: var(--green); font-weight: 500; }
+.log-arrow { font-size: 11px; color: var(--text3); }
 .log-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 5px; }
 .tag { font-size: 11px; padding: 3px 8px; border-radius: 20px; }
 .tag-green { background: var(--greenfaint); color: var(--green); border: 0.5px solid var(--greenborder); }
 .tag-red { background: var(--redfaint); color: var(--red); border: 0.5px solid var(--redborder); }
 .tag-amber { background: var(--amberfaint); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.25); }
 .log-note { font-size: 13px; color: var(--text2); line-height: 1.5; }
+/* DETAIL SCREEN */
+#screen-detail { background: var(--bg); flex-direction: column; overflow-y: auto; z-index: 50; }
+.detail-topbar { display: flex; align-items: center; gap: 12px; padding: 16px 20px 12px; flex-shrink: 0; }
+.detail-back { font-size: 20px; cursor: pointer; color: var(--text2); }
+.detail-title { font-family: 'Playfair Display', serif; font-size: 22px; color: var(--green); }
+.detail-subtitle { font-size: 12px; color: var(--text3); margin-left: auto; }
+.detail-body { padding: 0 16px 40px; flex: 1; }
+.detail-block { background: var(--card); border: 0.5px solid rgba(255,255,255,0.05); border-radius: var(--radius-sm); margin-bottom: 10px; overflow: hidden; }
+.detail-block-time { font-size: 12px; color: var(--green); font-weight: 600; padding: 10px 14px 0; letter-spacing: 0.05em; }
+.detail-block-tags { display: flex; gap: 6px; flex-wrap: wrap; padding: 7px 14px; }
+.detail-block-note { font-size: 13px; color: var(--text2); line-height: 1.6; padding: 0 14px 12px; border-top: 0.5px solid rgba(255,255,255,0.04); margin-top: 4px; padding-top: 8px; }
 
 /* PATTERNS */
 .pattern-card { background: var(--card); border: 0.5px solid rgba(255,255,255,0.05); border-radius: var(--radius); padding: 1rem 1.125rem; margin-bottom: 10px; }
@@ -478,6 +484,16 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       </div>
     </div>
   </div>
+</div>
+
+<!-- DETAIL -->
+<div class="screen" id="screen-detail">
+  <div class="detail-topbar">
+    <div class="detail-back" onclick="closeDetail()">←</div>
+    <div class="detail-title" id="detailTitle">Día 0</div>
+    <div class="detail-subtitle" id="detailSubtitle"></div>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1095,8 +1111,27 @@ function entryTags(e) {
   return tags;
 }
 
-function toggleLogEntry(el) {
-  el.closest('.log-entry').classList.toggle('open');
+function openDetail(dateKey) {
+  const entries = (S.log || []).filter(e => e.date === dateKey);
+  if (!entries.length) return;
+  const dayNum = entries[0].day;
+  document.getElementById('detailTitle').textContent = 'Día ' + dayNum;
+  document.getElementById('detailSubtitle').textContent = dateKey;
+  const body = document.getElementById('detailBody');
+  body.innerHTML = entries.map(e => {
+    const tags = entryTags(e);
+    return `<div class="detail-block">
+      ${e.savedAt ? `<div class="detail-block-time">🕐 ${e.savedAt}</div>` : ''}
+      ${tags.length ? `<div class="detail-block-tags">${tags.join('')}</div>` : ''}
+      ${e.note ? `<div class="detail-block-note">${e.note}</div>` : ''}
+      ${!tags.length && !e.note ? '<div style="padding:10px 14px;font-size:13px;color:var(--text3);">Sin detalles registrados.</div>' : ''}
+    </div>`;
+  }).join('');
+  document.getElementById('screen-detail').classList.add('active');
+}
+
+function closeDetail() {
+  document.getElementById('screen-detail').classList.remove('active');
 }
 
 function renderHistorial() {
@@ -1105,7 +1140,7 @@ function renderHistorial() {
     c.innerHTML = `<div class="empty-state">${t.emptyHist}</div>`;
     return;
   }
-  // Group entries by date (key = date string), preserving order
+  // Group by date, newest first
   const groups = {};
   const groupOrder = [];
   [...S.log].reverse().forEach(e => {
@@ -1114,26 +1149,19 @@ function renderHistorial() {
   });
   c.innerHTML = groupOrder.map(dateKey => {
     const g = groups[dateKey];
-    const subentries = g.entries.map(e => {
-      const tags = entryTags(e);
-      const timeLabel = e.savedAt ? `🕐 ${e.savedAt}` : '';
-      return `<div class="log-subentry">
-        ${timeLabel ? `<div class="log-subtime">${timeLabel}</div>` : ''}
-        ${tags.length ? `<div class="log-tags">${tags.join('')}</div>` : ''}
-        ${e.note ? `<div class="log-note">${e.note}</div>` : ''}
-      </div>`;
-    }).join('');
     const count = g.entries.length;
-    return `<div class="log-entry">
-      <div class="log-header" onclick="toggleLogEntry(this)">
+    // Preview tags from last entry
+    const previewTags = entryTags(g.entries[0]).slice(0, 3);
+    return `<div class="log-entry" onclick="openDetail('${dateKey.replace(/'/g,"\\'")}')">
+      <div class="log-entry-left">
         <div class="log-day">Día ${g.day}</div>
-        <div class="log-meta">
-          ${count > 1 ? `<span class="log-count">${count} registros</span>` : ''}
-          <div class="log-date">${g.date}</div>
-          <div class="log-chevron">▼</div>
-        </div>
+        <div class="log-date">${g.date}</div>
+        ${previewTags.length ? `<div class="log-preview">${previewTags.join('')}</div>` : ''}
       </div>
-      <div class="log-body">${subentries}</div>
+      <div class="log-entry-right">
+        ${count > 1 ? `<span class="tag tag-green">${count} registros</span>` : (g.entries[0].savedAt ? `<span class="log-time">${g.entries[0].savedAt}</span>` : '')}
+        <span class="log-arrow">›</span>
+      </div>
     </div>`;
   }).join('');
 }
