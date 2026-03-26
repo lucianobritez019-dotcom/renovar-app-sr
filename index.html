@@ -69,6 +69,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .day-hero { text-align: center; padding: 1.5rem 0 1rem; }
 .day-num { font-family: 'Playfair Display', serif; font-size: 80px; line-height: 1; color: var(--green); }
 .day-word { font-size: 13px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+.timer-clock { font-size: 30px; font-family: 'DM Sans', sans-serif; font-weight: 300; color: var(--text2); letter-spacing: 0.06em; margin-top: 8px; font-variant-numeric: tabular-nums; }
+.timer-clock span { color: var(--text3); font-size: 22px; }
+.settings-dt-input { width: 100%; padding: 8px 10px; background: var(--card2); border: 0.5px solid var(--greenborder); border-radius: var(--radius-xs); color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; margin-top: 8px; color-scheme: dark; }
 .streak-dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin: 1rem auto; max-width: 280px; }
 .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--card2); border: 0.5px solid var(--greenborder); transition: background 0.3s; }
 .dot.filled { background: var(--green3); border-color: var(--green3); }
@@ -303,6 +306,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div class="day-hero">
         <div class="day-num" id="dayNum">0</div>
         <div class="day-word" id="dayWord">días</div>
+        <div class="timer-clock" id="timerClock"><span>00</span>:<span>00</span>:<span>00</span></div>
         <div class="streak-dots" id="streakDots"></div>
       </div>
 
@@ -429,12 +433,17 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     </div>
     <div class="settings-section">
       <div class="settings-section-title" id="set-lbl-streak">Racha</div>
-      <div class="settings-item">
+      <div class="settings-item" style="flex-direction:column;align-items:flex-start;gap:4px;">
         <div class="settings-item-label" id="set-day-label">Estoy en el día</div>
         <div class="settings-day-row">
-          <input type="number" class="settings-day-input" id="settings-day-input" min="0" max="365" placeholder="0"/>
+          <input type="number" class="settings-day-input" id="settings-day-input" min="0" max="3650" placeholder="0"/>
           <button class="settings-day-btn" id="settings-day-btn" onclick="setManualDay()">OK</button>
         </div>
+      </div>
+      <div class="settings-item" style="flex-direction:column;align-items:flex-start;gap:4px;">
+        <div class="settings-item-label" id="set-startdt-label">Mi racha empezó el</div>
+        <input type="datetime-local" class="settings-dt-input" id="startDateTimeInput"/>
+        <button class="settings-day-btn" style="margin-top:6px;" onclick="setStartDateTime()">Guardar</button>
       </div>
     </div>
     <div class="settings-section">
@@ -480,7 +489,7 @@ const T = {
     confirmNuke: '¿Borrar TODOS los datos? Esto no se puede deshacer.',
     onbSub: 'Tu camino, día a día', onbLang: 'Idioma', onbDaysLabel: '¿Ya tenés días de racha?',
     onbDaysHint: 'Dejá en 0 si estás empezando hoy', onbBtn: 'Comenzar',
-    moods: ['Claro','Tranquilo','En paz','Tentado','Triste','Enérgico','Ansioso','Esperanzado','Cansado'],
+    moods: ['Claro','Tranquilo','En paz','Tentado','Triste','Nostálgico','Enérgico','Ansioso','Esperanzado','Cansado'],
     causes: ['Soledad','Redes sociales','Noche tarde','Estrés','Aburrimiento','Pantallas','Alcohol','Recuerdo'],
     times: ['Mañana','Mediodía','Tarde','Noche','Madrugada'],
     phases: {
@@ -525,7 +534,7 @@ const T = {
     confirmNuke: 'Delete ALL data? This cannot be undone.',
     onbSub: 'Your journey, day by day', onbLang: 'Language', onbDaysLabel: 'Already have a streak?',
     onbDaysHint: 'Leave at 0 if starting today', onbBtn: 'Begin',
-    moods: ['Clear','Peaceful','At peace','Tempted','Sad','Energetic','Anxious','Hopeful','Tired'],
+    moods: ['Clear','Peaceful','At peace','Tempted','Sad','Nostalgic','Energetic','Anxious','Hopeful','Tired'],
     causes: ['Loneliness','Social media','Late night','Stress','Boredom','Screens','Alcohol','Memory'],
     times: ['Morning','Noon','Afternoon','Evening','Late night'],
     phases: {
@@ -569,7 +578,7 @@ const T = {
     confirmNuke: 'Apagar TODOS os dados? Isso não pode ser desfeito.',
     onbSub: 'Sua jornada, dia a dia', onbLang: 'Idioma', onbDaysLabel: 'Já tem dias de sequência?',
     onbDaysHint: 'Deixe em 0 se estiver começando hoje', onbBtn: 'Começar',
-    moods: ['Claro','Tranquilo','Em paz','Tentado','Triste','Enérgico','Ansioso','Esperançoso','Cansado'],
+    moods: ['Claro','Tranquilo','Em paz','Tentado','Triste','Nostálgico','Enérgico','Ansioso','Esperançoso','Cansado'],
     causes: ['Solidão','Redes sociais','Noite tarde','Estresse','Tédio','Telas','Álcool','Lembrança'],
     times: ['Manhã','Meio-dia','Tarde','Noite','Madrugada'],
     phases: {
@@ -692,22 +701,71 @@ function todayISO() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function localDateTimeStr(date) {
+  // Returns "YYYY-MM-DDTHH:MM" for datetime-local input
+  var pad = function(n){ return n < 10 ? '0'+n : ''+n; };
+  return date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate()) +
+    'T' + pad(date.getHours()) + ':' + pad(date.getMinutes());
+}
+
 function initStartDate() {
   if (!S.startDate) {
     var d = new Date();
     d.setDate(d.getDate() - (S.days || 0));
     S.startDate = d.toISOString().slice(0, 10);
-    save();
   }
+  if (!S.startDateTime) {
+    S.startDateTime = S.startDate + 'T00:00:00';
+  }
+  save();
 }
 
 function currentStreakDay() {
-  if (!S.startDate) return S.days || 0;
-  var start = new Date(S.startDate + 'T00:00:00');
-  var today = new Date();
-  today.setHours(0, 0, 0, 0);
-  var diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
-  return Math.max(diff, 0);
+  var startStr = S.startDateTime || (S.startDate ? S.startDate + 'T00:00:00' : null);
+  if (!startStr) return S.days || 0;
+  var start = new Date(startStr);
+  var today = new Date(); today.setHours(0,0,0,0);
+  start.setHours(0,0,0,0);
+  return Math.max(Math.floor((today - start) / 86400000), 0);
+}
+
+// ─── CRONÓMETRO ──────────────────────────────────────────
+var _timerInterval = null;
+
+function startTimer() {
+  if (_timerInterval) clearInterval(_timerInterval);
+  updateTimer();
+  _timerInterval = setInterval(updateTimer, 1000);
+}
+
+function updateTimer() {
+  var el = document.getElementById('timerClock');
+  if (!el) return;
+  var startStr = S.startDateTime || (S.startDate ? S.startDate + 'T00:00:00' : null);
+  if (!startStr) { el.innerHTML = '<span>00</span>:<span>00</span>:<span>00</span>'; return; }
+  var start = new Date(startStr);
+  var now = new Date();
+  var diff = Math.max(now - start, 0);
+  var totalSec = Math.floor(diff / 1000);
+  var h = Math.floor((totalSec % 86400) / 3600);
+  var m = Math.floor((totalSec % 3600) / 60);
+  var s = totalSec % 60;
+  var p = function(n){ return n < 10 ? '0'+n : ''+n; };
+  el.innerHTML = '<span>' + p(h) + '</span>:<span>' + p(m) + '</span>:<span>' + p(s) + '</span>';
+}
+
+function setStartDateTime() {
+  var val = document.getElementById('startDateTimeInput').value;
+  if (!val) return;
+  S.startDateTime = val.length === 16 ? val + ':00' : val;
+  S.startDate = val.slice(0, 10);
+  var start = new Date(S.startDateTime); start.setHours(0,0,0,0);
+  var today = new Date(); today.setHours(0,0,0,0);
+  S.days = Math.max(Math.floor((today - start) / 86400000), 0);
+  save();
+  render();
+  updateTimer();
+  toast('✓ Racha actualizada');
 }
 
 function showApp() {
@@ -716,6 +774,7 @@ function showApp() {
   initStartDate();
   applyLang();
   render();
+  startTimer();
 }
 
 function applyLang() {
@@ -999,9 +1058,11 @@ function resetStreak() {
   if (!confirm(t.confirmReset)) return;
   S.days = 0;
   S.startDate = todayISO();
+  S.startDateTime = localDateTimeStr(new Date()) + ':00';
   S.todayMoods = []; S.todayVictory = null; S.todayCauses = []; S.todayTime = null; S.todayActions = [];
   save();
   render();
+  updateTimer();
   toast(t.resetDone);
 }
 
@@ -1089,7 +1150,12 @@ function switchTab(tab) {
 // ─── SETTINGS ────────────────────────────────────────────
 function openSettings() {
   document.getElementById('screen-settings').classList.add('active');
-  document.getElementById('settings-day-input').value = S.days;
+  document.getElementById('settings-day-input').value = currentStreakDay();
+  var dtInput = document.getElementById('startDateTimeInput');
+  if (dtInput) {
+    var sdt = S.startDateTime || (S.startDate ? S.startDate + 'T00:00' : '');
+    dtInput.value = sdt.slice(0, 16);
+  }
 }
 function closeSettings() {
   document.getElementById('screen-settings').classList.remove('active');
