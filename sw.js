@@ -1,6 +1,6 @@
-const CACHE = 'renovar-v2';
+const CACHE = 'renovar-v3';
 const BASE = '/renovar-app-sr';
-const ASSETS = [BASE + '/', BASE + '/index.html', BASE + '/manifest.json'];
+const ASSETS = [BASE + '/', BASE + '/index.html', BASE + '/manifest.json', BASE + '/sw.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
