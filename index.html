@@ -1295,9 +1295,24 @@ function save() {
 
 async function syncToSupabase() {
   if (!window._sb) return;
-  const { data: { user } } = await window._sb.auth.getUser();
-  if (!user) return;
-  window._sb.from('renovar_data').upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() }).then(() => {});
+  try {
+    const { data: { user } } = await window._sb.auth.getUser();
+    if (!user) return;
+    const { error } = await window._sb.from('renovar_data')
+      .upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+    if (error) console.error('Sync error:', error.message);
+  } catch(e) { console.error('Sync failed:', e); }
+}
+
+function mergeLog(local, remote) {
+  // Combine both arrays, deduplicate by date+savedAt key
+  const map = {};
+  (remote || []).forEach(e => { map[e.date + '|' + (e.savedAt||'')] = e; });
+  (local  || []).forEach(e => {
+    const k = e.date + '|' + (e.savedAt||'');
+    if (!map[k]) map[k] = e; // keep local entries not in remote
+  });
+  return Object.values(map).sort((a,b) => a.day - b.day || (a.savedAt||'').localeCompare(b.savedAt||''));
 }
 
 function toast(msg) {
@@ -1397,12 +1412,17 @@ async function bootApp() {
   const { data: { user } } = await window._sb.auth.getUser();
   if (!user) { document.getElementById('screen-login').classList.add('active'); return; }
   // Load from Supabase
-  const { data } = await window._sb.from('renovar_data').select('data').eq('user_id', user.id).maybeSingle();
-  if (data) {
-    S = { ...S, ...data.data };
-  } else if (S.onboarded) {
-    // migrate local data
-    await window._sb.from('renovar_data').insert({ user_id: user.id, data: S });
+  const { data, error: loadErr } = await window._sb.from('renovar_data').select('data').eq('user_id', user.id).maybeSingle();
+  if (data && data.data) {
+    const localLog = S.log || [];
+    const remoteData = data.data;
+    // Pick the most advanced state (startDateTime, days, etc.) but MERGE log entries
+    S = { ...S, ...remoteData };
+    S.log = mergeLog(localLog, remoteData.log);
+  } else if (!loadErr) {
+    // No row yet — upload local data
+    await window._sb.from('renovar_data')
+      .upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
   }
   if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
   if (!S.todayMoods) S.todayMoods = [];
