@@ -1465,6 +1465,28 @@ async function syncToSupabase() {
   } catch(e) { console.error('Sync failed:', e); }
 }
 
+async function syncFromSupabase() {
+  if (!window._sb) return;
+  try {
+    const { data: authData } = await window._sb.auth.getUser();
+    if (!authData || !authData.user) return;
+    const { data } = await window._sb.from('renovar_data').select('data').eq('user_id', authData.user.id).maybeSingle();
+    if (!data || !data.data) return;
+    const remoteData = data.data;
+    const localLog = S.log || [];
+    S = { ...S, ...remoteData };
+    S.log = mergeLog(localLog, remoteData.log);
+    localStorage.setItem('renovar_v1', JSON.stringify(S));
+    lang = S.lang || 'es'; t = T[lang];
+    render();
+  } catch(e) {}
+}
+
+// Re-sync when app comes back to foreground (iOS PWA stays in memory)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') syncFromSupabase();
+});
+
 function mergeLog(local, remote) {
   // Combine both arrays, deduplicate by date+savedAt key
   const map = {};
