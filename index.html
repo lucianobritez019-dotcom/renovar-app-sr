@@ -1600,29 +1600,43 @@ async function doLogin() {
 }
 
 async function bootApp() {
-  const { data: { user } } = await window._sb.auth.getUser();
-  if (!user) { document.getElementById('screen-login').classList.add('active'); return; }
-  // Load from Supabase
-  const { data, error: loadErr } = await window._sb.from('renovar_data').select('data').eq('user_id', user.id).maybeSingle();
-  if (data && data.data) {
-    const localLog = S.log || [];
-    const remoteData = data.data;
-    // Pick the most advanced state (startDateTime, days, etc.) but MERGE log entries
-    S = { ...S, ...remoteData };
-    S.log = mergeLog(localLog, remoteData.log);
-  } else if (!loadErr) {
-    // No row yet — upload local data
-    await window._sb.from('renovar_data')
-      .upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+  try {
+    const { data: authData } = await window._sb.auth.getUser();
+    const user = authData && authData.user;
+    if (!user) { document.getElementById('screen-login').classList.add('active'); return; }
+
+    // Ocultar login ANTES de cargar datos, así el usuario entra aunque falle la carga
+    document.getElementById('screen-login').classList.remove('active');
+
+    try {
+      const { data, error: loadErr } = await window._sb.from('renovar_data').select('data').eq('user_id', user.id).maybeSingle();
+      if (data && data.data) {
+        const localLog = S.log || [];
+        const remoteData = data.data;
+        S = { ...S, ...remoteData };
+        try { S.log = mergeLog(localLog, remoteData.log); } catch(e) { S.log = localLog; }
+      } else if (!loadErr) {
+        window._sb.from('renovar_data')
+          .upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+          .then(() => {}).catch(() => {});
+      }
+    } catch(e) {
+      // Si falla la carga remota, usar datos locales
+    }
+
+    if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
+    if (!S.todayMoods) S.todayMoods = [];
+    if (!S.todayActions) S.todayActions = [];
+    localStorage.setItem('renovar_v1', JSON.stringify(S));
+    lang = S.lang || 'es'; t = T[lang];
+    if (S.onboarded) { showApp(); }
+    else { document.getElementById('screen-onboarding').classList.add('active'); }
+  } catch(e) {
+    // Error fatal — mostrar login
+    document.getElementById('screen-login').classList.add('active');
+    var st = document.getElementById('loginStatus');
+    if (st) { st.style.color = '#e05555'; st.textContent = 'Error al cargar. Intentá de nuevo.'; }
   }
-  if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
-  if (!S.todayMoods) S.todayMoods = [];
-  if (!S.todayActions) S.todayActions = [];
-  localStorage.setItem('renovar_v1', JSON.stringify(S));
-  document.getElementById('screen-login').classList.remove('active');
-  lang = S.lang || 'es'; t = T[lang];
-  if (S.onboarded) { showApp(); }
-  else { document.getElementById('screen-onboarding').classList.add('active'); }
 }
 
 // ─── BOOT ────────────────────────────────────────────────
