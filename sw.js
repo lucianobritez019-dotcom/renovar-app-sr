@@ -1,4 +1,4 @@
-const CACHE = 'renovar-v7';
+const CACHE = 'renovar-v8';
 const BASE = '/renovar-app-sr';
 const ASSETS = [BASE + '/', BASE + '/index.html', BASE + '/manifest.json', BASE + '/sw.js'];
 
