@@ -254,7 +254,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <input type="checkbox" id="rememberMe" onchange="toggleRemember(this.checked)"/>
       <label for="rememberMe">Recordarme</label>
     </div>
-    <button class="btn-main" onclick="doLogin()">Entrar</button>
+    <button class="btn-main" id="loginBtn" onclick="doLogin()">Entrar</button>
     <div class="auth-links">
       <a class="auth-link" href="#" onclick="event.preventDefault();showAuthScreen('screen-forgot');">¿Olvidaste tu contraseña?</a>
       <a class="auth-link" href="#" onclick="event.preventDefault();showAuthScreen('screen-register');">Crear cuenta</a>
@@ -1561,36 +1561,42 @@ async function doForgotPassword() {
 }
 
 async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pw = document.getElementById('loginPassword').value;
+  const emailEl = document.getElementById('loginEmail');
+  const pwEl = document.getElementById('loginPassword');
   const status = document.getElementById('loginStatus');
-  const btn = document.querySelector('#screen-login .btn-main');
-  status.style.color = 'var(--red)';
+  const btn = document.getElementById('loginBtn');
+  const email = emailEl ? emailEl.value.trim() : '';
+  const pw = pwEl ? pwEl.value : '';
+  status.style.color = '#e05555';
   status.textContent = '';
+  if (!window._sb) { status.textContent = 'Error de conexión. Recargá la app.'; return; }
   if (!email) { status.textContent = 'Ingresá tu email.'; return; }
   if (!pw) { status.textContent = 'Ingresá tu contraseña.'; return; }
   btn.textContent = 'Entrando...';
   btn.disabled = true;
-  const { error } = await window._sb.auth.signInWithPassword({ email, password: pw });
+  try {
+    const { error } = await window._sb.auth.signInWithPassword({ email, password: pw });
+    if (error) {
+      const msg = error.message || '';
+      if (msg.includes('Invalid login') || msg.includes('invalid') || msg.includes('credentials')) {
+        status.textContent = 'Email o contraseña incorrectos.';
+      } else if (msg.includes('not confirmed')) {
+        status.textContent = 'Confirmá tu email antes de entrar.';
+      } else {
+        status.textContent = msg || 'Error al iniciar sesión.';
+      }
+    } else {
+      if (document.getElementById('rememberMe').checked) {
+        localStorage.setItem('renovar_saved_email', email);
+      } else {
+        localStorage.removeItem('renovar_saved_email');
+      }
+    }
+  } catch(e) {
+    status.textContent = 'Sin conexión. Verificá tu internet.';
+  }
   btn.textContent = 'Entrar';
   btn.disabled = false;
-  if (error) {
-    const msg = error.message || '';
-    if (msg.includes('Invalid login') || msg.includes('invalid') || msg.includes('credentials')) {
-      status.textContent = 'Email o contraseña incorrectos.';
-    } else if (msg.includes('Email not confirmed')) {
-      status.textContent = 'Confirmá tu email antes de entrar.';
-    } else {
-      status.textContent = 'Error al iniciar sesión. Intentá de nuevo.';
-    }
-    return;
-  }
-  // Save email if remember-me is checked
-  if (document.getElementById('rememberMe').checked) {
-    localStorage.setItem('renovar_saved_email', email);
-  } else {
-    localStorage.removeItem('renovar_saved_email');
-  }
 }
 
 async function bootApp() {
