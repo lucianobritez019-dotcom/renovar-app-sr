@@ -220,6 +220,24 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .corazon-banner.visible { display:block; }
 .corazon-banner-text { font-family:'Playfair Display',serif; font-size:15px; color:var(--green); line-height:1.6; }
 
+/* AFIRMACIONES */
+.afirm-section { margin-top:14px; }
+.afirm-header { font-size:10px; color:var(--text3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; }
+.afirm-card { background:var(--card); border:0.5px solid var(--greenborder); border-radius:var(--radius); padding:1.5rem 1.25rem; position:relative; }
+.afirm-counter { font-size:11px; color:var(--text3); letter-spacing:0.08em; margin-bottom:14px; }
+.afirm-text { font-family:'Playfair Display',serif; font-style:italic; font-size:17px; color:var(--text); line-height:1.65; }
+.afirm-dots { display:flex; gap:5px; flex-wrap:wrap; justify-content:center; margin:16px 0 14px; }
+.afirm-dot { width:6px; height:6px; border-radius:50%; background:var(--card2); border:0.5px solid var(--greenborder); transition:all 0.2s; }
+.afirm-dot.active { background:var(--green); border-color:var(--green); }
+.afirm-dot.done { background:var(--green3); border-color:var(--green3); }
+.afirm-nav { display:flex; gap:8px; }
+.afirm-btn { flex:1; padding:11px; border-radius:var(--radius-sm); border:0.5px solid var(--greenborder); background:transparent; color:var(--green); font-size:13px; font-family:'DM Sans',sans-serif; font-weight:500; cursor:pointer; transition:all 0.15s; }
+.afirm-btn:active { background:var(--greenfaint); transform:scale(0.97); }
+.afirm-btn.primary { background:var(--green); color:#0f1a14; border-color:var(--green); }
+.afirm-btn.primary:active { background:var(--green2); }
+.afirm-all-done { text-align:center; padding:0.5rem 0 0; font-size:13px; color:var(--text3); display:none; }
+.afirm-all-done.visible { display:block; }
+
 /* AUTH EXTRAS */
 .pw-wrap { position: relative; margin-bottom: 12px; }
 .pw-wrap .login-field { margin-bottom: 0; width: 100%; box-sizing: border-box; padding-right: 44px; }
@@ -353,6 +371,21 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <div class="card" style="margin-top:10px">
       <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--text);line-height:1.65">"Sobre todas las cosas cuida tu corazón, porque de él mana la vida."</div>
       <div style="font-size:12px;color:var(--text3);margin-top:8px">— Proverbios 4:23</div>
+    </div>
+
+    <!-- AFIRMACIONES DIARIAS -->
+    <div class="afirm-section">
+      <div class="afirm-header">Afirmaciones diarias</div>
+      <div class="afirm-card">
+        <div class="afirm-counter" id="afirm-counter">1 / 18</div>
+        <div class="afirm-text" id="afirm-text"></div>
+        <div class="afirm-dots" id="afirm-dots"></div>
+        <div class="afirm-nav">
+          <button class="afirm-btn" id="afirm-prev" onclick="afirmNav(-1)">← Anterior</button>
+          <button class="afirm-btn primary" id="afirm-next" onclick="afirmNav(1)">Siguiente →</button>
+        </div>
+        <div class="afirm-all-done" id="afirm-all-done">Completaste todas las afirmaciones de hoy ✓</div>
+      </div>
     </div>
   </div>
 </div>
@@ -782,6 +815,80 @@ function toggleCorazon(i) {
   if (navigator.vibrate) navigator.vibrate(15);
 }
 
+// ─── AFIRMACIONES DIARIAS ────────────────────────────────
+const AFIRMACIONES = [
+  'Estoy parado en mi centro aunque duela.',
+  'Construyo hoy sin esperar que todo esté resuelto.',
+  'Amo con el corazón abierto y sin necesitar controlar.',
+  'Soy guiado por algo más grande que mis emociones del momento.',
+  'Me merezco lo que Dios tiene preparado, no lo que el miedo me ofrece.',
+  'Mi historia no me define, me formó.',
+  'Lo que fui ayer no limita lo que elijo ser hoy.',
+  'Las personas pueden cambiar. Juzgo desde lo que veo hoy, no desde lo que escucho.',
+  'El dolor no es el enemigo, escapar de él sí.',
+  'Esto también va a pasar. Sigo de pie.',
+  'Sentir profundo es señal de que viví algo real.',
+  'Observo lo que siento, no soy lo que siento.',
+  'Soy hijo de Dios. Eso no cambia con lo que siento, lo que pasó, ni lo que viene.',
+  'Jesús ya pagó por mis errores. No cargo culpa que ya fue perdonada.',
+  'Dios no me abandonó en lo más difícil. No me va a abandonar ahora.',
+  'Fui creado con propósito. No estoy acá por casualidad.',
+  'Mi valor no viene de lo que logro ni de quién me ama. Viene de quién me creó.',
+  'Si Dios es por mí, ¿quién contra mí?'
+];
+
+function getAfirmKey() {
+  return 'afirm_idx_' + new Date().toISOString().split('T')[0];
+}
+
+function getAfirmIdx() {
+  return parseInt(localStorage.getItem(getAfirmKey()) || '0', 10);
+}
+
+function saveAfirmIdx(idx) {
+  localStorage.setItem(getAfirmKey(), String(idx));
+}
+
+function renderAfirm() {
+  var idx = getAfirmIdx();
+  var total = AFIRMACIONES.length;
+  document.getElementById('afirm-text').textContent = '“' + AFIRMACIONES[idx] + '”';
+  document.getElementById('afirm-counter').textContent = (idx + 1) + ' / ' + total;
+  var prevBtn = document.getElementById('afirm-prev');
+  var nextBtn = document.getElementById('afirm-next');
+  var allDone = document.getElementById('afirm-all-done');
+  prevBtn.style.display = idx === 0 ? 'none' : '';
+  if (idx === total - 1) {
+    nextBtn.textContent = 'Volver al inicio';
+    nextBtn.classList.remove('primary');
+    nextBtn.classList.add('primary');
+    allDone.classList.add('visible');
+  } else {
+    nextBtn.textContent = 'Siguiente →';
+    allDone.classList.remove('visible');
+  }
+  var dotsEl = document.getElementById('afirm-dots');
+  dotsEl.innerHTML = '';
+  for (var i = 0; i < total; i++) {
+    var d = document.createElement('div');
+    d.className = 'afirm-dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
+    dotsEl.appendChild(d);
+  }
+}
+
+function afirmNav(dir) {
+  var idx = getAfirmIdx();
+  var total = AFIRMACIONES.length;
+  if (dir === 1 && idx === total - 1) {
+    idx = 0;
+  } else {
+    idx = Math.max(0, Math.min(total - 1, idx + dir));
+  }
+  saveAfirmIdx(idx);
+  renderAfirm();
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
 function openSR() {
   document.getElementById('screen-corazon').classList.remove('active');
   document.getElementById('screen-app').classList.add('active');
@@ -793,6 +900,7 @@ function closeSR() {
   document.getElementById('screen-app').classList.remove('active');
   document.getElementById('screen-corazon').classList.add('active');
   renderCorazon();
+  renderAfirm();
 }
 
 // ─── APP INIT ────────────────────────────────────────────
@@ -800,6 +908,7 @@ function showApp() {
   document.getElementById('screen-onboarding').classList.remove('active');
   document.getElementById('screen-corazon').classList.add('active');
   renderCorazon();
+  renderAfirm();
 }
 
 function applyLang() {
