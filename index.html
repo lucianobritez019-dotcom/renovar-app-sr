@@ -230,11 +230,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .afirm-dot { width:6px; height:6px; border-radius:50%; background:var(--card2); border:0.5px solid var(--greenborder); transition:all 0.2s; }
 .afirm-dot.active { background:var(--green); border-color:var(--green); }
 .afirm-dot.done { background:var(--green3); border-color:var(--green3); }
-.afirm-nav { display:flex; gap:8px; }
-.afirm-btn { flex:1; padding:11px; border-radius:var(--radius-sm); border:0.5px solid var(--greenborder); background:transparent; color:var(--green); font-size:13px; font-family:'DM Sans',sans-serif; font-weight:500; cursor:pointer; transition:all 0.15s; }
-.afirm-btn:active { background:var(--greenfaint); transform:scale(0.97); }
-.afirm-btn.primary { background:var(--green); color:#0f1a14; border-color:var(--green); }
-.afirm-btn.primary:active { background:var(--green2); }
+.afirm-nav { display:flex; gap:10px; justify-content:center; align-items:center; }
+.afirm-arrow { width:44px; height:44px; border-radius:50%; border:0.5px solid var(--greenborder); background:transparent; color:var(--green); font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; flex-shrink:0; }
+.afirm-arrow:active { background:var(--greenfaint); transform:scale(0.92); }
+.afirm-arrow:disabled { opacity:0.2; pointer-events:none; }
 .afirm-all-done { text-align:center; padding:0.5rem 0 0; font-size:13px; color:var(--text3); display:none; }
 .afirm-all-done.visible { display:block; }
 
@@ -341,13 +340,22 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div class="corazon-check" id="corazon-chk-0"></div>
       <div style="flex:1">
         <div class="corazon-cat">Cuerpo</div>
-        <div class="corazon-action">Entrenás y respirás</div>
-        <div class="corazon-desc">Gym o movimiento hoy. Y 10 min de meditación — no para dejar de sentir, sino para no ser arrastrado por lo que sentís.</div>
+        <div class="corazon-action">Entrenás hoy</div>
+        <div class="corazon-desc">Gym o movimiento. El cuerpo en movimiento ancla la mente.</div>
       </div>
     </div>
 
     <div id="corazon-item-1" class="corazon-item" onclick="toggleCorazon(1)">
       <div class="corazon-check" id="corazon-chk-1"></div>
+      <div style="flex:1">
+        <div class="corazon-cat">Mente</div>
+        <div class="corazon-action">Meditás y respirás</div>
+        <div class="corazon-desc">10 minutos de silencio — no para dejar de sentir, sino para no ser arrastrado por lo que sentís.</div>
+      </div>
+    </div>
+
+    <div id="corazon-item-2" class="corazon-item" onclick="toggleCorazon(2)">
+      <div class="corazon-check" id="corazon-chk-2"></div>
       <div style="flex:1">
         <div class="corazon-cat">Centro</div>
         <div class="corazon-action">Notás sin reaccionar</div>
@@ -355,8 +363,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       </div>
     </div>
 
-    <div id="corazon-item-2" class="corazon-item" onclick="toggleCorazon(2)">
-      <div class="corazon-check" id="corazon-chk-2"></div>
+    <div id="corazon-item-3" class="corazon-item" onclick="toggleCorazon(3)">
+      <div class="corazon-check" id="corazon-chk-3"></div>
       <div style="flex:1">
         <div class="corazon-cat">Propósito</div>
         <div class="corazon-action">Construís algo hoy</div>
@@ -381,8 +389,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="afirm-text" id="afirm-text"></div>
         <div class="afirm-dots" id="afirm-dots"></div>
         <div class="afirm-nav">
-          <button class="afirm-btn" id="afirm-prev" onclick="afirmNav(-1)">← Anterior</button>
-          <button class="afirm-btn primary" id="afirm-next" onclick="afirmNav(1)">Siguiente →</button>
+          <button class="afirm-arrow" id="afirm-prev" onclick="afirmNav(-1)">←</button>
+          <button class="afirm-arrow" id="afirm-next" onclick="afirmNav(1)">→</button>
         </div>
         <div class="afirm-all-done" id="afirm-all-done">Completaste todas las afirmaciones de hoy ✓</div>
       </div>
@@ -792,7 +800,7 @@ function getCorazonKey() {
 }
 
 function loadCorazonChecked() {
-  return JSON.parse(localStorage.getItem(getCorazonKey()) || 'null') || [false, false, false];
+  return JSON.parse(localStorage.getItem(getCorazonKey()) || 'null') || [false, false, false, false];
 }
 
 function renderCorazon() {
@@ -834,7 +842,7 @@ const AFIRMACIONES = [
   'Dios no me abandonó en lo más difícil. No me va a abandonar ahora.',
   'Fui creado con propósito. No estoy acá por casualidad.',
   'Mi valor no viene de lo que logro ni de quién me ama. Viene de quién me creó.',
-  'Si Dios es por mí, ¿quién contra mí?'
+  'Si Dios está conmigo, ¿quién contra mí?'
 ];
 
 function getAfirmKey() {
@@ -857,16 +865,9 @@ function renderAfirm() {
   var prevBtn = document.getElementById('afirm-prev');
   var nextBtn = document.getElementById('afirm-next');
   var allDone = document.getElementById('afirm-all-done');
-  prevBtn.style.display = idx === 0 ? 'none' : '';
-  if (idx === total - 1) {
-    nextBtn.textContent = 'Volver al inicio';
-    nextBtn.classList.remove('primary');
-    nextBtn.classList.add('primary');
-    allDone.classList.add('visible');
-  } else {
-    nextBtn.textContent = 'Siguiente →';
-    allDone.classList.remove('visible');
-  }
+  prevBtn.disabled = idx === 0;
+  nextBtn.disabled = idx === total - 1;
+  allDone.classList.toggle('visible', idx === total - 1);
   var dotsEl = document.getElementById('afirm-dots');
   dotsEl.innerHTML = '';
   for (var i = 0; i < total; i++) {
@@ -879,11 +880,7 @@ function renderAfirm() {
 function afirmNav(dir) {
   var idx = getAfirmIdx();
   var total = AFIRMACIONES.length;
-  if (dir === 1 && idx === total - 1) {
-    idx = 0;
-  } else {
-    idx = Math.max(0, Math.min(total - 1, idx + dir));
-  }
+  idx = Math.max(0, Math.min(total - 1, idx + dir));
   saveAfirmIdx(idx);
   renderAfirm();
   if (navigator.vibrate) navigator.vibrate(10);
