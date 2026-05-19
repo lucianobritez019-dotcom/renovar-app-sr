@@ -237,6 +237,28 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .afirm-all-done { text-align:center; padding:0.5rem 0 0; font-size:13px; color:var(--text3); display:none; }
 .afirm-all-done.visible { display:block; }
 
+/* POWER POSE */
+.pose-section { margin-top:14px; }
+.pose-header { font-size:10px; color:var(--text3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; }
+.pose-card { background:var(--card); border:0.5px solid var(--greenborder); border-radius:var(--radius); padding:1.25rem; }
+.pose-desc { font-size:14px; color:var(--text2); line-height:1.65; margin-bottom:16px; }
+.pose-timer { text-align:center; margin:4px 0 18px; }
+.pose-time { font-family:'Playfair Display',serif; font-size:52px; color:var(--green); letter-spacing:0.04em; line-height:1; }
+.pose-btn { width:100%; padding:13px; border-radius:var(--radius-sm); border:none; background:var(--green); color:#0f1a14; font-size:15px; font-family:'DM Sans',sans-serif; font-weight:500; cursor:pointer; transition:all 0.15s; }
+.pose-btn:active { transform:scale(0.98); }
+.pose-btn.running { background:var(--card2); border:0.5px solid var(--greenborder); color:var(--text2); }
+.pose-done-lbl { text-align:center; font-size:13px; color:var(--green); margin-top:12px; display:none; }
+.pose-done-lbl.visible { display:block; }
+
+/* POSTURA DORMIR */
+.sleep-section { margin-top:14px; }
+.sleep-header { font-size:10px; color:var(--text3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; }
+.sleep-card { background:var(--card); border:0.5px solid rgba(255,255,255,0.06); border-radius:var(--radius); padding:1rem 1.125rem; }
+.sleep-item { display:flex; gap:12px; align-items:flex-start; padding:9px 0; border-bottom:0.5px solid rgba(255,255,255,0.04); }
+.sleep-item:last-child { border-bottom:none; padding-bottom:2px; }
+.sleep-dot { width:6px; height:6px; border-radius:50%; background:var(--green3); flex-shrink:0; margin-top:7px; }
+.sleep-text { font-size:14px; color:var(--text2); line-height:1.55; }
+
 /* AUTH EXTRAS */
 .pw-wrap { position: relative; margin-bottom: 12px; }
 .pw-wrap .login-field { margin-bottom: 0; width: 100%; box-sizing: border-box; padding-right: 44px; }
@@ -393,6 +415,31 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           <button class="afirm-arrow" id="afirm-next" onclick="afirmNav(1)">→</button>
         </div>
         <div class="afirm-all-done" id="afirm-all-done">Completaste todas las afirmaciones de hoy ✓</div>
+      </div>
+    </div>
+
+    <!-- POWER POSE -->
+    <div class="pose-section">
+      <div class="pose-header">Power Pose</div>
+      <div class="pose-card">
+        <div class="pose-desc">Brazos abiertos en V, pecho abierto, mentón levemente arriba, respiración profunda. 2 minutos.</div>
+        <div class="pose-timer">
+          <div class="pose-time" id="pose-time">2:00</div>
+        </div>
+        <button class="pose-btn" id="pose-btn" onclick="poseToggle()">Iniciar</button>
+        <div class="pose-done-lbl" id="pose-done-lbl">✓ Completado — bien hecho</div>
+      </div>
+    </div>
+
+    <!-- POSTURA PARA DORMIR -->
+    <div class="sleep-section">
+      <div class="sleep-header">Postura para dormir</div>
+      <div class="sleep-card">
+        <div class="sleep-item"><div class="sleep-dot"></div><div class="sleep-text">Almohada baja o sin almohada</div></div>
+        <div class="sleep-item"><div class="sleep-dot"></div><div class="sleep-text">Almohada pequeña bajo las rodillas</div></div>
+        <div class="sleep-item"><div class="sleep-dot"></div><div class="sleep-text">Brazos a los costados, ligeramente separados del cuerpo</div></div>
+        <div class="sleep-item"><div class="sleep-dot"></div><div class="sleep-text">Pecho abierto, hombros caídos hacia el colchón</div></div>
+        <div class="sleep-item"><div class="sleep-dot"></div><div class="sleep-text">Respiración hacia la espalda baja al quedarte dormido</div></div>
       </div>
     </div>
   </div>
@@ -820,6 +867,7 @@ const AFIRMACIONES = [
   'Dios no me abandonó en lo más difícil. No me va a abandonar ahora.',
   'Fui creado con propósito. No estoy acá por casualidad.',
   'Mi valor no viene de lo que logro ni de quién me ama. Viene de quién me creó.',
+  'Mi cuerpo habla antes que mi boca. Ocupo el espacio con calma y sin disculparme.',
   'Si Dios está conmigo, ¿quién contra mí?'
 ];
 
@@ -862,6 +910,59 @@ function afirmNav(dir) {
   saveAfirmIdx(idx);
   renderAfirm();
   if (navigator.vibrate) navigator.vibrate(10);
+}
+
+// ─── POWER POSE ──────────────────────────────────────────
+var _poseInterval = null;
+var _poseSecs = 120;
+var _poseDone = false;
+
+function _poseFmt(s) {
+  return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
+}
+
+function poseToggle() {
+  if (_poseDone) {
+    _poseSecs = 120; _poseDone = false;
+    document.getElementById('pose-time').textContent = '2:00';
+    document.getElementById('pose-btn').textContent = 'Iniciar';
+    document.getElementById('pose-btn').classList.remove('running');
+    document.getElementById('pose-done-lbl').classList.remove('visible');
+    return;
+  }
+  if (_poseInterval) {
+    clearInterval(_poseInterval); _poseInterval = null;
+    document.getElementById('pose-btn').textContent = 'Continuar';
+    document.getElementById('pose-btn').classList.remove('running');
+    return;
+  }
+  document.getElementById('pose-btn').textContent = 'Pausar';
+  document.getElementById('pose-btn').classList.add('running');
+  _poseInterval = setInterval(function() {
+    _poseSecs--;
+    document.getElementById('pose-time').textContent = _poseFmt(_poseSecs);
+    if (_poseSecs <= 0) {
+      clearInterval(_poseInterval); _poseInterval = null;
+      _poseDone = true;
+      document.getElementById('pose-btn').textContent = 'Reiniciar';
+      document.getElementById('pose-btn').classList.remove('running');
+      document.getElementById('pose-done-lbl').classList.add('visible');
+      if (navigator.vibrate) navigator.vibrate([300, 150, 300, 150, 300]);
+      (function() {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+          osc.connect(gain); gain.connect(ctx.destination);
+          osc.type = 'sine'; osc.frequency.value = 528;
+          gain.gain.setValueAtTime(0, ctx.currentTime);
+          gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime + 0.15);
+          gain.gain.linearRampToValueAtTime(0, ctx.currentTime + 1.5);
+          osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 1.5);
+        } catch(e) {}
+      })();
+    }
+  }, 1000);
 }
 
 function openSR() {
