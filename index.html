@@ -433,28 +433,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="mood-grid" id="moodGrid"></div>
       </div>
 
-      <div class="card">
-        <div class="card-label" id="lbl-battle">¿Tuviste tentaciones hoy?</div>
-        <div class="vic-row">
-          <div class="vic-btn win" id="btn-had" onclick="setHadTemptation(true)"><span id="lbl-had">Sí tuve</span></div>
-          <div class="vic-btn neutral" id="btn-nohad" onclick="setHadTemptation(false)"><span id="lbl-nohad">No tuve</span></div>
-        </div>
-        <div class="fall-section" id="hadTemSection">
-          <div class="card-label" style="margin-top:12px;" id="lbl-what-did">¿Qué hiciste al respecto?</div>
-          <div class="actions-grid" id="actionsGrid"></div>
-          <div class="card-label" id="lbl-result">¿Cómo terminó?</div>
-          <div class="vic-row">
-            <div class="vic-btn win" id="btn-vic" onclick="setVictory('victoria')"><span id="lbl-vic">✓ La resistí</span></div>
-            <div class="vic-btn loss" id="btn-fall" onclick="setVictory('caida')"><span id="lbl-fall">✗ Caí</span></div>
-          </div>
-          <div class="fall-section" id="fallSection">
-            <div class="card-label" style="margin-top:12px;" id="lbl-why">¿Qué crees que la causó?</div>
-            <div class="fall-grid" id="fallGrid"></div>
-            <div class="card-label" id="lbl-time">¿En qué momento?</div>
-            <div class="fall-grid" id="timeGrid"></div>
-          </div>
-        </div>
-      </div>
 
       <div class="tips-card" id="tipsCard">
         <div class="card-label" id="lbl-tips">Qué ayuda ahora</div>
@@ -914,22 +892,12 @@ function applyLang() {
   document.getElementById('lbl-verse').textContent = t.verse;
   document.getElementById('lbl-phase').textContent = t.phase;
   document.getElementById('lbl-mood').textContent = t.mood;
-  document.getElementById('lbl-battle').textContent = t.battle;
-  document.getElementById('lbl-why').textContent = t.why;
-  document.getElementById('lbl-time').textContent = t.time;
   document.getElementById('lbl-note').textContent = t.note;
   document.getElementById('noteInput').placeholder = t.notePH;
   document.getElementById('saveBtn').textContent = t.save;
   document.getElementById('resetBtn').textContent = t.reset;
   document.getElementById('lbl-benefit').textContent = t.benefitLbl || 'Lo que la mayoría siente ahora';
-  document.getElementById('lbl-had').textContent = t.hadTem || 'Sí tuve';
-  document.getElementById('lbl-nohad').textContent = t.noTem || 'No tuve';
-  document.getElementById('lbl-what-did').textContent = t.whatDid || '¿Qué hiciste al respecto?';
-  document.getElementById('lbl-result').textContent = t.result || '¿Cómo terminó?';
-  document.getElementById('lbl-vic').textContent = t.resistedY || '✓ La resistí';
-  document.getElementById('lbl-fall').textContent = t.resistedN || '✗ Caí';
   document.getElementById('lbl-tips').textContent = t.tipsTitle || 'Qué ayuda ahora';
-  buildActionsGrid();
   document.getElementById('nav-lbl-hoy').textContent = t.today;
   document.getElementById('nav-lbl-hist').textContent = t.hist;
   document.getElementById('nav-lbl-pat').textContent = t.pat;
@@ -1027,70 +995,13 @@ function buildIdentity() {
 function restoreTodayState() {
   buildMoodGrid();
   buildFallGrids();
-  buildActionsGrid();
-  updateVicButtons();
-  const hadTem = S.todayVictory === 'victoria' || S.todayVictory === 'caida';
-  const hadNo = S.todayVictory === 'ninguna';
-  if (hadTem) {
-    document.getElementById('hadTemSection').classList.add('visible');
-    updateHadTemButtons(true);
-  } else if (hadNo) {
-    updateHadTemButtons(false);
-  }
-  if (S.todayVictory === 'caida') {
-    document.getElementById('fallSection').classList.add('visible');
-  }
   if (S.todayNote) document.getElementById('noteInput').value = S.todayNote;
   renderTips();
 }
 
-function updateVicButtons() {
-  const bv = document.getElementById('btn-vic');
-  const bf = document.getElementById('btn-fall');
-  if (!bv || !bf) return;
-  bv.className = 'vic-btn win' + (S.todayVictory === 'victoria' ? ' sel' : '');
-  bf.className = 'vic-btn loss' + (S.todayVictory === 'caida' ? ' sel' : '');
-}
-
-function setHadTemptation(had) {
-  if (had) {
-    document.getElementById('hadTemSection').classList.add('visible');
-    document.getElementById('btn-had').classList.add('win');
-    document.getElementById('btn-nohad').classList.remove('win');
-    if (S.todayVictory === 'ninguna') { S.todayVictory = null; save(); }
-  } else {
-    document.getElementById('hadTemSection').classList.remove('visible');
-    document.getElementById('fallSection').classList.remove('visible');
-    S.todayVictory = 'ninguna';
-    S.todayActions = [];
-    save();
-    renderTips();
-  }
-  updateHadTemButtons(had);
-}
-
-function updateHadTemButtons(had) {
-  const btnHad = document.getElementById('btn-had');
-  const btnNo = document.getElementById('btn-nohad');
-  if (!btnHad || !btnNo) return;
-  if (had === true) {
-    btnHad.classList.add('win'); btnNo.classList.remove('win');
-  } else if (had === false) {
-    btnNo.classList.add('win'); btnHad.classList.remove('win');
-  } else {
-    btnHad.classList.remove('win'); btnNo.classList.remove('win');
-  }
-}
-
 function buildActionsGrid() {
-  const grid = document.getElementById('actionsGrid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  (t.actions || []).forEach(a => {
-    const chip = document.createElement('div');
-    chip.className = 'action-chip' + ((S.todayActions||[]).includes(a) ? ' sel' : '');
-    chip.textContent = a;
-    chip.onclick = () => toggleAction(a);
+  // kept for compatibility — actions grid removed
+  if (false) {
     grid.appendChild(chip);
   });
 }
@@ -1136,32 +1047,6 @@ function toggleMood(m) {
   renderTips();
 }
 
-function setVictory(type) {
-  S.todayVictory = type;
-  save();
-  updateVicButtons();
-  const fs = document.getElementById('fallSection');
-  if (type === 'caida') fs.classList.add('visible');
-  else fs.classList.remove('visible');
-  renderTips();
-}
-
-function toggleCause(c) {
-  S.todayCauses = S.todayCauses || [];
-  const idx = S.todayCauses.indexOf(c);
-  if (idx >= 0) S.todayCauses.splice(idx, 1);
-  else S.todayCauses.push(c);
-  save();
-  buildFallGrids();
-}
-
-function selectTime(tm) {
-  S.todayTime = tm;
-  save();
-  document.querySelectorAll('#timeGrid .fall-chip').forEach(c => {
-    c.classList.toggle('sel', c.textContent === tm);
-  });
-}
 
 function saveDay() {
   const note = document.getElementById('noteInput').value.trim();
