@@ -237,6 +237,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .afirm-all-done { text-align:center; padding:0.5rem 0 0; font-size:13px; color:var(--text3); display:none; }
 .afirm-all-done.visible { display:block; }
 
+/* STRETCH TIMER */
+.stretch-timer-row { display:flex; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:0.5px solid rgba(255,255,255,0.05); }
+.stretch-time-display { font-family:'Playfair Display',serif; font-size:22px; color:var(--green); min-width:42px; }
+.stretch-ctrl { width:34px; height:34px; border-radius:50%; border:0.5px solid var(--greenborder); background:transparent; color:var(--green); font-size:15px; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
+.stretch-ctrl:active { background:var(--greenfaint); transform:scale(0.93); }
+.stretch-ctrl.running { background:var(--greenfaint); }
+.stretch-done-text { font-size:11px; color:var(--green); letter-spacing:0.04em; display:none; }
+.stretch-done-text.visible { display:block; }
+
 /* POWER POSE */
 .pose-section { margin-top:14px; }
 .pose-header { font-size:10px; color:var(--text3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; }
@@ -394,6 +403,48 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       </div>
     </div>
 
+    <div id="corazon-item-4" class="corazon-item" onclick="toggleCorazon(4)">
+      <div class="corazon-check" id="corazon-chk-4"></div>
+      <div style="flex:1">
+        <div class="corazon-cat">Estiramiento</div>
+        <div class="corazon-action">Wall Pec Stretch — brazo derecho</div>
+        <div class="corazon-desc">Brazo derecho completamente extendido contra la pared, girá el tronco hacia la izquierda. Mantené.</div>
+        <div class="stretch-timer-row" onclick="event.stopPropagation()">
+          <div class="stretch-time-display" id="stretch-time-4">1:00</div>
+          <button class="stretch-ctrl" id="stretch-ctrl-4" onclick="stretchToggle(4)">▶</button>
+          <div class="stretch-done-text" id="stretch-done-4">Completado ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="corazon-item-5" class="corazon-item" onclick="toggleCorazon(5)">
+      <div class="corazon-check" id="corazon-chk-5"></div>
+      <div style="flex:1">
+        <div class="corazon-cat">Estiramiento</div>
+        <div class="corazon-action">Wall Pec Stretch — brazo izquierdo</div>
+        <div class="corazon-desc">Brazo izquierdo completamente extendido contra la pared, girá el tronco hacia la derecha. Mantené.</div>
+        <div class="stretch-timer-row" onclick="event.stopPropagation()">
+          <div class="stretch-time-display" id="stretch-time-5">1:00</div>
+          <button class="stretch-ctrl" id="stretch-ctrl-5" onclick="stretchToggle(5)">▶</button>
+          <div class="stretch-done-text" id="stretch-done-5">Completado ✓</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="corazon-item-6" class="corazon-item" onclick="toggleCorazon(6)">
+      <div class="corazon-check" id="corazon-chk-6"></div>
+      <div style="flex:1">
+        <div class="corazon-cat">Estiramiento</div>
+        <div class="corazon-action">Forearm Stretch</div>
+        <div class="corazon-desc">Brazo completamente extendido al frente, con la otra mano jalá los dedos hacia atrás. Mantené.</div>
+        <div class="stretch-timer-row" onclick="event.stopPropagation()">
+          <div class="stretch-time-display" id="stretch-time-6">1:00</div>
+          <button class="stretch-ctrl" id="stretch-ctrl-6" onclick="stretchToggle(6)">▶</button>
+          <div class="stretch-done-text" id="stretch-done-6">Completado ✓</div>
+        </div>
+      </div>
+    </div>
+
     <div class="corazon-banner" id="corazon-banner">
       <div class="corazon-banner-text">Todo completado hoy.<br/>El trabajo interno se nota en el de afuera.</div>
     </div>
@@ -422,6 +473,14 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <div class="pose-section">
       <div class="pose-header">Power Pose</div>
       <div class="pose-card">
+        <svg viewBox="0 0 120 130" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 4px;opacity:0.85" width="72" height="78">
+          <circle cx="60" cy="17" r="11" fill="none" stroke="#4ade80" stroke-width="2.5"/>
+          <line x1="60" y1="28" x2="60" y2="78" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="60" y1="43" x2="16" y2="12" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="60" y1="43" x2="104" y2="12" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="60" y1="78" x2="41" y2="114" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="60" y1="78" x2="79" y2="114" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
         <div class="pose-desc">Brazos abiertos en V, pecho abierto, mentón levemente arriba, respiración profunda. 2 minutos.</div>
         <div class="pose-timer">
           <div class="pose-time" id="pose-time">2:00</div>
@@ -614,7 +673,7 @@ const T = {
     confirmNuke: '¿Borrar TODOS los datos? Esto no se puede deshacer.',
     onbSub: 'Tu camino, día a día', onbLang: 'Idioma', onbDaysLabel: '¿Ya tenés días de racha?',
     onbDaysHint: 'Dejá en 0 si estás empezando hoy', onbBtn: 'Comenzar',
-    moods: ['Claro','Tranquilo','En paz','Tentado','Triste','Enérgico','Ansioso','Esperanzado','Cansado'],
+    moods: ['Claro','Tranquilo','En paz','Corazón abierto','Tentado','Triste','Enérgico','Ansioso','Esperanzado','Cansado'],
     causes: ['Soledad','Redes sociales','Noche tarde','Estrés','Aburrimiento','Pantallas','Alcohol','Recuerdo'],
     times: ['Mañana','Mediodía','Tarde','Noche','Madrugada'],
     phases: {
@@ -659,7 +718,7 @@ const T = {
     confirmNuke: 'Delete ALL data? This cannot be undone.',
     onbSub: 'Your journey, day by day', onbLang: 'Language', onbDaysLabel: 'Already have a streak?',
     onbDaysHint: 'Leave at 0 if starting today', onbBtn: 'Begin',
-    moods: ['Clear','Peaceful','At peace','Tempted','Sad','Energetic','Anxious','Hopeful','Tired'],
+    moods: ['Clear','Peaceful','At peace','Open heart','Tempted','Sad','Energetic','Anxious','Hopeful','Tired'],
     causes: ['Loneliness','Social media','Late night','Stress','Boredom','Screens','Alcohol','Memory'],
     times: ['Morning','Noon','Afternoon','Evening','Late night'],
     phases: {
@@ -703,7 +762,7 @@ const T = {
     confirmNuke: 'Apagar TODOS os dados? Isso não pode ser desfeito.',
     onbSub: 'Sua jornada, dia a dia', onbLang: 'Idioma', onbDaysLabel: 'Já tem dias de sequência?',
     onbDaysHint: 'Deixe em 0 se estiver começando hoje', onbBtn: 'Começar',
-    moods: ['Claro','Tranquilo','Em paz','Tentado','Triste','Enérgico','Ansioso','Esperançoso','Cansado'],
+    moods: ['Claro','Tranquilo','Em paz','Coração aberto','Tentado','Triste','Enérgico','Ansioso','Esperançoso','Cansado'],
     causes: ['Solidão','Redes sociais','Noite tarde','Estresse','Tédio','Telas','Álcool','Lembrança'],
     times: ['Manhã','Meio-dia','Tarde','Noite','Madrugada'],
     phases: {
@@ -825,7 +884,7 @@ function getCorazonKey() {
 }
 
 function loadCorazonChecked() {
-  return JSON.parse(localStorage.getItem(getCorazonKey()) || 'null') || [false, false, false, false];
+  return JSON.parse(localStorage.getItem(getCorazonKey()) || 'null') || [false, false, false, false, false, false, false];
 }
 
 function renderCorazon() {
@@ -943,6 +1002,50 @@ function afirmNav(dir) {
   saveAfirmIdx(idx);
   renderAfirm();
   if (navigator.vibrate) navigator.vibrate(10);
+}
+
+// ─── STRETCH TIMERS ──────────────────────────────────────
+var _stretchTimers = {};
+var _stretchSecs = { 4: 60, 5: 60, 6: 60 };
+var _stretchDone = { 4: false, 5: false, 6: false };
+
+function stretchToggle(id) {
+  if (_stretchDone[id]) {
+    _stretchSecs[id] = 60;
+    _stretchDone[id] = false;
+    document.getElementById('stretch-time-' + id).textContent = '1:00';
+    document.getElementById('stretch-ctrl-' + id).textContent = '▶';
+    document.getElementById('stretch-ctrl-' + id).classList.remove('running');
+    document.getElementById('stretch-done-' + id).classList.remove('visible');
+    return;
+  }
+  if (_stretchTimers[id]) {
+    clearInterval(_stretchTimers[id]);
+    _stretchTimers[id] = null;
+    document.getElementById('stretch-ctrl-' + id).textContent = '▶';
+    document.getElementById('stretch-ctrl-' + id).classList.remove('running');
+    return;
+  }
+  document.getElementById('stretch-ctrl-' + id).textContent = '⏸';
+  document.getElementById('stretch-ctrl-' + id).classList.add('running');
+  _stretchTimers[id] = setInterval(function() {
+    _stretchSecs[id]--;
+    var s = _stretchSecs[id];
+    document.getElementById('stretch-time-' + id).textContent =
+      Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
+    if (s <= 0) {
+      clearInterval(_stretchTimers[id]);
+      _stretchTimers[id] = null;
+      _stretchDone[id] = true;
+      document.getElementById('stretch-time-' + id).textContent = '1:00';
+      document.getElementById('stretch-ctrl-' + id).textContent = '↺';
+      document.getElementById('stretch-ctrl-' + id).classList.remove('running');
+      document.getElementById('stretch-done-' + id).classList.add('visible');
+      var checked = loadCorazonChecked();
+      if (!checked[id]) { checked[id] = true; localStorage.setItem(getCorazonKey(), JSON.stringify(checked)); renderCorazon(); }
+      if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+    }
+  }, 1000);
 }
 
 // ─── POWER POSE ──────────────────────────────────────────
