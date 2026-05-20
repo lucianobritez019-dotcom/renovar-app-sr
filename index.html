@@ -399,8 +399,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     </div>
 
     <div class="card" style="margin-top:10px">
-      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--text);line-height:1.65">"Sobre todas las cosas cuida tu corazón, porque de él mana la vida."</div>
-      <div style="font-size:12px;color:var(--text3);margin-top:8px">— Proverbios 4:23</div>
+      <div style="font-family:'Playfair Display',serif;font-style:italic;font-size:15px;color:var(--text);line-height:1.65" id="corazon-verse-text"></div>
+      <div style="font-size:12px;color:var(--text3);margin-top:8px" id="corazon-verse-ref"></div>
     </div>
 
     <!-- AFIRMACIONES DIARIAS -->
@@ -837,6 +837,7 @@ function renderCorazon() {
     document.getElementById('corazon-item-' + i).classList.toggle('done', done);
     document.getElementById('corazon-chk-' + i).textContent = done ? '✓' : '';
   });
+  renderCorazonVerse();
   document.getElementById('corazon-banner').classList.toggle('visible', checked.every(Boolean));
 }
 
@@ -846,6 +847,38 @@ function toggleCorazon(i) {
   localStorage.setItem(getCorazonKey(), JSON.stringify(checked));
   renderCorazon();
   if (navigator.vibrate) navigator.vibrate(15);
+}
+
+// ─── VERSÍCULO CORAZÓN ABIERTO ───────────────────────────
+const CORAZON_VERSES = [
+  { text: 'Sobre todas las cosas cuida tu corazón, porque de él mana la vida.', ref: 'Proverbios 4:23' },
+  { text: 'El amor es sufrido, es benigno; el amor no tiene envidia, no es jactancioso, no se envanece.', ref: '1 Corintios 13:4' },
+  { text: 'No nos ha dado Dios espíritu de cobardía, sino de poder, de amor y de dominio propio.', ref: '2 Timoteo 1:7' },
+  { text: 'Sean fuertes y valientes. No teman ni se asusten, porque el Señor su Dios estará con ustedes dondequiera que vayan.', ref: 'Josué 1:9' },
+  { text: 'El que domina su espíritu es mejor que el que toma una ciudad.', ref: 'Proverbios 16:32' },
+  { text: 'No os conforméis a este siglo, sino transformaos por medio de la renovación de vuestro entendimiento.', ref: 'Romanos 12:2' },
+  { text: 'Confía en el Señor con todo tu corazón, y no te apoyes en tu propio entendimiento.', ref: 'Proverbios 3:5' },
+  { text: 'El amor perfecto echa fuera el temor.', ref: '1 Juan 4:18' },
+  { text: 'Bienaventurados los de limpio corazón, porque ellos verán a Dios.', ref: 'Mateo 5:8' },
+  { text: 'Todo lo puedo en Cristo que me fortalece.', ref: 'Filipenses 4:13' },
+  { text: 'Mas el que persevere hasta el fin, éste será salvo.', ref: 'Mateo 24:13' },
+  { text: 'Si el Hijo os libertare, seréis verdaderamente libres.', ref: 'Juan 8:36' },
+  { text: 'Porque yo sé los pensamientos que tengo acerca de vosotros, pensamientos de paz y no de mal.', ref: 'Jeremías 29:11' },
+  { text: 'El Señor es mi pastor; nada me faltará.', ref: 'Salmo 23:1' },
+  { text: 'Someteos a Dios; resistid al diablo, y huirá de vosotros.', ref: 'Santiago 4:7' },
+  { text: 'Crea en mí, oh Dios, un corazón limpio, y renueva un espíritu recto dentro de mí.', ref: 'Salmo 51:10' },
+  { text: 'Si Dios es por nosotros, ¿quién contra nosotros?', ref: 'Romanos 8:31' },
+  { text: 'Venid a mí todos los que estáis trabajados y cargados, y yo os haré descansar.', ref: 'Mateo 11:28' },
+  { text: 'Fui creado de manera formidable y maravillosa.', ref: 'Salmo 139:14' },
+  { text: 'El amor nunca deja de ser.', ref: '1 Corintios 13:8' },
+];
+
+function renderCorazonVerse() {
+  var day = new Date();
+  var dayIndex = Math.floor((day - new Date(day.getFullYear(), 0, 0)) / 86400000);
+  var v = CORAZON_VERSES[dayIndex % CORAZON_VERSES.length];
+  document.getElementById('corazon-verse-text').textContent = '“' + v.text + '”';
+  document.getElementById('corazon-verse-ref').textContent = '— ' + v.ref;
 }
 
 // ─── AFIRMACIONES DIARIAS ────────────────────────────────
