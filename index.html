@@ -397,6 +397,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
             <button class="med-step-btn" onclick="medStep(1)">+</button>
           </div>
           <div class="med-label">min</div>
+          <button class="med-step-btn" style="border-radius:12px;width:auto;padding:0 8px;font-size:11px;" onclick="medStep(5)">+5</button>
+          <button class="med-step-btn" style="border-radius:12px;width:auto;padding:0 8px;font-size:11px;" onclick="medStep(10)">+10</button>
         </div>
       </div>
     </div>
@@ -923,6 +925,14 @@ function renderCorazon() {
   });
   renderCorazonVerse();
   renderMedMin();
+  renderPose();
+  [4, 5, 6].forEach(function(id) {
+    if (checked[id]) {
+      _stretchDone[id] = true;
+      document.getElementById('stretch-done-' + id).classList.add('visible');
+      document.getElementById('stretch-ctrl-' + id).textContent = '↺';
+    }
+  });
   document.getElementById('corazon-banner').classList.toggle('visible', checked.every(Boolean));
 }
 
@@ -1095,13 +1105,23 @@ var _poseInterval = null;
 var _poseSecs = 120;
 var _poseDone = false;
 
-function _poseFmt(s) {
-  return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
+function _poseDoneKey() { return 'pose_done_' + new Date().toISOString().split('T')[0]; }
+function _poseFmt(s) { return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
+
+function renderPose() {
+  if (localStorage.getItem(_poseDoneKey())) {
+    _poseDone = true;
+    document.getElementById('pose-time').textContent = '2:00';
+    document.getElementById('pose-btn').textContent = 'Reiniciar';
+    document.getElementById('pose-btn').classList.remove('running');
+    document.getElementById('pose-done-lbl').classList.add('visible');
+  }
 }
 
 function poseToggle() {
   if (_poseDone) {
     _poseSecs = 120; _poseDone = false;
+    localStorage.removeItem(_poseDoneKey());
     document.getElementById('pose-time').textContent = '2:00';
     document.getElementById('pose-btn').textContent = 'Iniciar';
     document.getElementById('pose-btn').classList.remove('running');
@@ -1122,6 +1142,7 @@ function poseToggle() {
     if (_poseSecs <= 0) {
       clearInterval(_poseInterval); _poseInterval = null;
       _poseDone = true;
+      localStorage.setItem(_poseDoneKey(), '1');
       document.getElementById('pose-btn').textContent = 'Reiniciar';
       document.getElementById('pose-btn').classList.remove('running');
       document.getElementById('pose-done-lbl').classList.add('visible');
