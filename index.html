@@ -237,6 +237,14 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .afirm-all-done { text-align:center; padding:0.5rem 0 0; font-size:13px; color:var(--text3); display:none; }
 .afirm-all-done.visible { display:block; }
 
+/* MEDITATION MINUTES */
+.med-row { display:flex; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:0.5px solid rgba(255,255,255,0.05); }
+.med-stepper { display:flex; align-items:center; gap:8px; }
+.med-step-btn { width:28px; height:28px; border-radius:50%; border:0.5px solid var(--greenborder); background:transparent; color:var(--green); font-size:16px; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
+.med-step-btn:active { background:var(--greenfaint); transform:scale(0.9); }
+.med-min-display { font-family:'Playfair Display',serif; font-size:22px; color:var(--green); min-width:28px; text-align:center; }
+.med-label { font-size:12px; color:var(--text3); }
+
 /* STRETCH TIMER */
 .stretch-timer-row { display:flex; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:0.5px solid rgba(255,255,255,0.05); }
 .stretch-time-display { font-family:'Playfair Display',serif; font-size:22px; color:var(--green); min-width:42px; }
@@ -381,7 +389,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div style="flex:1">
         <div class="corazon-cat">Mente</div>
         <div class="corazon-action">Meditás y respirás</div>
-        <div class="corazon-desc">10 minutos de silencio — no para dejar de sentir, sino para no ser arrastrado por lo que sentís.</div>
+        <div class="corazon-desc">Silencio — no para dejar de sentir, sino para no ser arrastrado por lo que sentís.</div>
+        <div class="med-row" onclick="event.stopPropagation()">
+          <div class="med-stepper">
+            <button class="med-step-btn" onclick="medStep(-1)">−</button>
+            <div class="med-min-display" id="med-min">0</div>
+            <button class="med-step-btn" onclick="medStep(1)">+</button>
+          </div>
+          <div class="med-label">min</div>
+        </div>
       </div>
     </div>
 
@@ -442,6 +458,15 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
           <button class="stretch-ctrl" id="stretch-ctrl-6" onclick="stretchToggle(6)">▶</button>
           <div class="stretch-done-text" id="stretch-done-6">Completado ✓</div>
         </div>
+      </div>
+    </div>
+
+    <div id="corazon-item-7" class="corazon-item" onclick="toggleCorazon(7)">
+      <div class="corazon-check" id="corazon-chk-7"></div>
+      <div style="flex:1">
+        <div class="corazon-cat">Gratitud</div>
+        <div class="corazon-action">Gratitude journaling</div>
+        <div class="corazon-desc">Escribí o decí 3 o más cosas por las que te sentís agradecido hoy.</div>
       </div>
     </div>
 
@@ -884,7 +909,7 @@ function getCorazonKey() {
 }
 
 function loadCorazonChecked() {
-  return JSON.parse(localStorage.getItem(getCorazonKey()) || 'null') || [false, false, false, false, false, false, false];
+  return JSON.parse(localStorage.getItem(getCorazonKey()) || 'null') || [false, false, false, false, false, false, false, false];
 }
 
 function renderCorazon() {
@@ -897,6 +922,7 @@ function renderCorazon() {
     document.getElementById('corazon-chk-' + i).textContent = done ? '✓' : '';
   });
   renderCorazonVerse();
+  renderMedMin();
   document.getElementById('corazon-banner').classList.toggle('visible', checked.every(Boolean));
 }
 
@@ -960,6 +986,7 @@ const AFIRMACIONES = [
   'Fui creado con propósito. No estoy acá por casualidad.',
   'Mi valor no viene de lo que logro ni de quién me ama. Viene de quién me creó.',
   'Mi cuerpo habla antes que mi boca. Ocupo el espacio con calma y sin disculparme.',
+  'Cada persona que cruzo merece amor. No juzgo su pasado ni sus heridas.',
   'Si Dios está conmigo, ¿quién contra mí?'
 ];
 
@@ -1002,6 +1029,21 @@ function afirmNav(dir) {
   saveAfirmIdx(idx);
   renderAfirm();
   if (navigator.vibrate) navigator.vibrate(10);
+}
+
+// ─── MEDITACIÓN MINUTOS ──────────────────────────────────
+function getMedKey() { return 'med_min_' + new Date().toISOString().split('T')[0]; }
+function getMedMin() { return parseInt(localStorage.getItem(getMedKey()) || '0', 10); }
+
+function medStep(dir) {
+  var m = Math.max(0, getMedMin() + dir);
+  localStorage.setItem(getMedKey(), String(m));
+  document.getElementById('med-min').textContent = m;
+}
+
+function renderMedMin() {
+  var el = document.getElementById('med-min');
+  if (el) el.textContent = getMedMin();
 }
 
 // ─── STRETCH TIMERS ──────────────────────────────────────
