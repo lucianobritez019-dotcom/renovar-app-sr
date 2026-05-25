@@ -906,8 +906,12 @@ function completeOnboarding() {
 }
 
 // ─── CORAZÓN ABIERTO ─────────────────────────────────────
+function localDate() {
+  var d = new Date();
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 function getCorazonKey() {
-  return 'corazon_' + new Date().toISOString().split('T')[0];
+  return 'corazon_' + localDate();
 }
 
 function loadCorazonChecked() {
@@ -1001,7 +1005,7 @@ const AFIRMACIONES = [
 ];
 
 function getAfirmKey() {
-  return 'afirm_idx_' + new Date().toISOString().split('T')[0];
+  return 'afirm_idx_' + localDate();
 }
 
 function getAfirmIdx() {
@@ -1042,7 +1046,7 @@ function afirmNav(dir) {
 }
 
 // ─── MEDITACIÓN MINUTOS ──────────────────────────────────
-function getMedKey() { return 'med_min_' + new Date().toISOString().split('T')[0]; }
+function getMedKey() { return 'med_min_' + localDate(); }
 function getMedMin() { return parseInt(localStorage.getItem(getMedKey()) || '0', 10); }
 
 function medStep(dir) {
@@ -1105,7 +1109,7 @@ var _poseInterval = null;
 var _poseSecs = 120;
 var _poseDone = false;
 
-function _poseDoneKey() { return 'pose_done_' + new Date().toISOString().split('T')[0]; }
+function _poseDoneKey() { return 'pose_done_' + localDate(); }
 function _poseFmt(s) { return Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60); }
 
 function renderPose() {
@@ -1345,7 +1349,7 @@ function toggleMood(m) {
 
 function saveDay() {
   const note = document.getElementById('noteInput').value.trim();
-  const today = new Date().toLocaleDateString('es-PY');
+  const today = localDate();
   S.log = S.log || [];
   const existing = S.log.findIndex(e => e.date === today);
   const entry = {
@@ -1525,9 +1529,12 @@ function save() {
 
 async function syncToSupabase() {
   if (!window._sb) return;
-  const { data: { user } } = await window._sb.auth.getUser();
-  if (!user) return;
-  window._sb.from('renovar_data').upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() }).then(() => {});
+  try {
+    const { data: { user } } = await window._sb.auth.getUser();
+    if (!user) return;
+    const { error } = await window._sb.from('renovar_data').upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() });
+    if (error) console.warn('Sync error:', error.message);
+  } catch(e) { console.warn('Sync failed:', e); }
 }
 
 function toast(msg) {
@@ -1629,9 +1636,14 @@ async function bootApp() {
   // Load from Supabase
   const { data } = await window._sb.from('renovar_data').select('data').eq('user_id', user.id).maybeSingle();
   if (data) {
+    const localDays = S.days || 0;
+    const remoteDays = (data.data && data.data.days) || 0;
     S = { ...S, ...data.data };
+    if (localDays > remoteDays) {
+      S.days = localDays;
+      syncToSupabase();
+    }
   } else if (S.onboarded) {
-    // migrate local data
     await window._sb.from('renovar_data').insert({ user_id: user.id, data: S });
   }
   if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
