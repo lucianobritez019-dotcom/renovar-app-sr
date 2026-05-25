@@ -690,12 +690,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="benefit-text" id="benefitText"></div>
       </div>
 
-      <div class="card">
-        <div class="card-label" id="lbl-mood">¿Cómo te sentís hoy?</div>
-        <div class="mood-grid" id="moodGrid"></div>
-      </div>
-
-
       <div class="tips-card" id="tipsCard">
         <div class="card-label" id="lbl-tips">Qué ayuda ahora</div>
         <div id="tipsContent"></div>
@@ -1422,7 +1416,6 @@ function applyLang() {
   document.getElementById('dayWord').textContent = t.days;
   document.getElementById('lbl-verse').textContent = t.verse;
   document.getElementById('lbl-phase').textContent = t.phase;
-  document.getElementById('lbl-mood').textContent = t.mood;
   document.getElementById('lbl-note').textContent = t.note;
   document.getElementById('noteInput').placeholder = t.notePH;
   document.getElementById('saveBtn').textContent = t.save;
@@ -1482,6 +1475,7 @@ function buildStreakDots() {
 
 function buildMoodGrid() {
   const grid = document.getElementById('moodGrid');
+  if (!grid) return;
   grid.innerHTML = '';
   t.moods.forEach(m => {
     const chip = document.createElement('div');
@@ -1494,6 +1488,7 @@ function buildMoodGrid() {
 
 function buildFallGrids() {
   const fg = document.getElementById('fallGrid');
+  if (!fg) return;
   fg.innerHTML = '';
   t.causes.forEach(c => {
     const chip = document.createElement('div');
@@ -1589,8 +1584,8 @@ function saveDay() {
   else { S.log.push(entry); S.days++; }
   S.todayMoods = []; S.todayVictory = null; S.todayCauses = []; S.todayTime = null; S.todayActions = [];
   document.getElementById('noteInput').value = '';
-  document.getElementById('hadTemSection').classList.remove('visible');
-  document.getElementById('fallSection').classList.remove('visible');
+  document.getElementById('hadTemSection')?.classList.remove('visible');
+  document.getElementById('fallSection')?.classList.remove('visible');
   save();
   render();
   toast(t.saved);
