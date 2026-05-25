@@ -276,6 +276,23 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .sleep-dot { width:6px; height:6px; border-radius:50%; background:var(--green3); flex-shrink:0; margin-top:7px; }
 .sleep-text { font-size:14px; color:var(--text2); line-height:1.55; }
 
+/* ACTIVIDADES */
+.act-section { margin-top:14px; }
+.act-section-header { font-size:10px; color:var(--text3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; }
+.act-card { background:var(--card); border:0.5px solid rgba(255,255,255,0.06); border-radius:var(--radius); padding:1rem 1.125rem; margin-bottom:10px; }
+.act-title { font-family:'Playfair Display',serif; font-size:16px; color:var(--text); margin-bottom:12px; }
+.act-presets { display:flex; gap:8px; margin-bottom:12px; }
+.act-preset { flex:1; padding:10px 6px; border-radius:var(--radius-xs); border:0.5px solid var(--greenborder); background:transparent; color:var(--green); font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; text-align:center; transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
+.act-preset:active { transform:scale(0.95); }
+.act-preset.sel { background:var(--greenfaint); font-weight:500; }
+.act-log-btn { width:100%; padding:12px; border-radius:var(--radius-sm); background:var(--green); border:none; color:#0f1a14; font-size:14px; font-family:'DM Sans',sans-serif; font-weight:500; cursor:pointer; transition:all 0.15s; }
+.act-log-btn:active { background:var(--green2); transform:scale(0.98); }
+.act-log-btn:disabled { background:var(--card2); color:var(--text3); }
+.act-history { margin-top:10px; }
+.act-hist-row { display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-top:0.5px solid rgba(255,255,255,0.04); }
+.act-hist-date { font-size:12px; color:var(--text3); }
+.act-hist-min { font-size:12px; color:var(--green); font-weight:500; }
+
 /* AUTH EXTRAS */
 .pw-wrap { position: relative; margin-bottom: 12px; }
 .pw-wrap .login-field { margin-bottom: 0; width: 100%; box-sizing: border-box; padding-right: 44px; }
@@ -526,6 +543,33 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div class="sleep-item"><div class="sleep-dot"></div><div class="sleep-text">Brazos a los costados, ligeramente separados del cuerpo</div></div>
         <div class="sleep-item"><div class="sleep-dot"></div><div class="sleep-text">Pecho abierto, hombros caídos hacia el colchón</div></div>
         <div class="sleep-item"><div class="sleep-dot"></div><div class="sleep-text">Respiración hacia la espalda baja al quedarte dormido</div></div>
+      </div>
+    </div>
+
+    <!-- ACTIVIDADES -->
+    <div class="act-section">
+      <div class="act-section-header">Actividades</div>
+
+      <div class="act-card">
+        <div class="act-title">Sauna</div>
+        <div class="act-presets">
+          <div class="act-preset" id="sauna-10" onclick="actSelect('sauna',10)">10 min</div>
+          <div class="act-preset" id="sauna-15" onclick="actSelect('sauna',15)">15 min</div>
+          <div class="act-preset" id="sauna-20" onclick="actSelect('sauna',20)">20 min</div>
+        </div>
+        <button class="act-log-btn" id="sauna-btn" onclick="actLog('sauna')" disabled>Registrar sesión</button>
+        <div class="act-history" id="sauna-history"></div>
+      </div>
+
+      <div class="act-card">
+        <div class="act-title">Red Light Therapy</div>
+        <div class="act-presets">
+          <div class="act-preset" id="rlt-10" onclick="actSelect('rlt',10)">10 min</div>
+          <div class="act-preset" id="rlt-15" onclick="actSelect('rlt',15)">15 min</div>
+          <div class="act-preset" id="rlt-20" onclick="actSelect('rlt',20)">20 min</div>
+        </div>
+        <button class="act-log-btn" id="rlt-btn" onclick="actLog('rlt')" disabled>Registrar sesión</button>
+        <div class="act-history" id="rlt-history"></div>
       </div>
     </div>
   </div>
@@ -929,6 +973,7 @@ function renderCorazon() {
   });
   renderCorazonVerse();
   renderMedMin();
+  renderAllActivities();
   renderPose();
   [4, 5, 6].forEach(function(id) {
     if (checked[id]) {
@@ -1043,6 +1088,51 @@ function afirmNav(dir) {
   saveAfirmIdx(idx);
   renderAfirm();
   if (navigator.vibrate) navigator.vibrate(10);
+}
+
+// ─── ACTIVIDADES ─────────────────────────────────────────
+var _actSel = { sauna: null, rlt: null };
+
+function actSelect(act, min) {
+  _actSel[act] = _actSel[act] === min ? null : min;
+  [10, 15, 20].forEach(function(m) {
+    var el = document.getElementById(act + '-' + m);
+    if (el) el.classList.toggle('sel', _actSel[act] === m);
+  });
+  var btn = document.getElementById(act + '-btn');
+  if (btn) btn.disabled = !_actSel[act];
+}
+
+function actGetLog(act) {
+  return JSON.parse(localStorage.getItem('act_' + act) || '[]');
+}
+
+function actLog(act) {
+  if (!_actSel[act]) return;
+  var log = actGetLog(act);
+  log.unshift({ date: localDate(), min: _actSel[act], ts: Date.now() });
+  localStorage.setItem('act_' + act, JSON.stringify(log));
+  actSelect(act, _actSel[act]);
+  renderActHistory(act);
+  if (navigator.vibrate) navigator.vibrate([15, 50, 15]);
+}
+
+function renderActHistory(act) {
+  var el = document.getElementById(act + '-history');
+  if (!el) return;
+  var log = actGetLog(act).slice(0, 7);
+  if (!log.length) { el.innerHTML = ''; return; }
+  el.innerHTML = log.map(function(e) {
+    var parts = e.date.split('-');
+    var d = new Date(parseInt(parts[0]), parseInt(parts[1])-1, parseInt(parts[2]));
+    var label = d.toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' });
+    return '<div class="act-hist-row"><span class="act-hist-date">' + label + '</span><span class="act-hist-min">' + e.min + ' min</span></div>';
+  }).join('');
+}
+
+function renderAllActivities() {
+  renderActHistory('sauna');
+  renderActHistory('rlt');
 }
 
 // ─── MEDITACIÓN MINUTOS ──────────────────────────────────
