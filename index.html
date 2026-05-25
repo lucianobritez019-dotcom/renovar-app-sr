@@ -1750,6 +1750,7 @@ function toggleVoice() {
 
 // ─── UTILS ───────────────────────────────────────────────
 function save() {
+  S.lastSavedAt = new Date().toISOString();
   localStorage.setItem('renovar_v1', JSON.stringify(S));
   syncToSupabase();
 }
@@ -1759,7 +1760,10 @@ async function syncToSupabase() {
   try {
     const { data: { user } } = await window._sb.auth.getUser();
     if (!user) return;
-    const { error } = await window._sb.from('renovar_data').upsert({ user_id: user.id, data: S, updated_at: new Date().toISOString() });
+    const { error } = await window._sb.from('renovar_data').upsert(
+      { user_id: user.id, data: S, updated_at: new Date().toISOString() },
+      { onConflict: 'user_id' }
+    );
     if (error) console.warn('Sync error:', error.message);
   } catch(e) { console.warn('Sync failed:', e); }
 }
@@ -1865,10 +1869,14 @@ async function bootApp() {
   if (data) {
     const localDays = S.days || 0;
     const remoteDays = (data.data && data.data.days) || 0;
+    const localSavedAt = S.lastSavedAt || '';
+    const remoteSavedAt = (data.data && data.data.lastSavedAt) || '';
     S = { ...S, ...data.data };
-    if (localDays > remoteDays) {
+    // Local wins if it was saved more recently (covers manual overrides and failed syncs)
+    if (localSavedAt >= remoteSavedAt) {
       S.days = localDays;
-      syncToSupabase();
+      S.lastSavedAt = localSavedAt;
+      if (localDays !== remoteDays) syncToSupabase();
     }
   } else if (S.onboarded) {
     await window._sb.from('renovar_data').insert({ user_id: user.id, data: S });
