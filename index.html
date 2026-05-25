@@ -604,9 +604,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <!-- GYM RUTINA -->
 <div class="screen" id="screen-gym">
   <div class="topbar">
-    <div class="topbar-back" onclick="closeGym()">←</div>
+    <div class="topbar-back" onclick="gymUndo()">↩</div>
     <div class="topbar-title" style="font-family:'Playfair Display',serif;font-size:18px">Rutina</div>
-    <div class="topbar-sr" onclick="resetGym()" style="font-size:11px">Reset</div>
+    <div class="topbar-sr" onclick="closeGym()" style="font-size:11px">Atrás</div>
   </div>
   <div class="scroll-area">
     <div id="gym-item-0" class="gym-item" onclick="gymTap(0)">
@@ -1177,6 +1177,7 @@ function afirmNav(dir) {
 
 // ─── GYM ─────────────────────────────────────────────────
 var _gymSeries = [0,0,0,0,0,0,0,0,0,0,0];
+var _gymLastTapped = null;
 
 function openGym() {
   document.getElementById('screen-corazon').classList.remove('active');
@@ -1190,6 +1191,7 @@ function closeGym() {
 
 function gymTap(i) {
   _gymSeries[i]++;
+  _gymLastTapped = i;
   var n = _gymSeries[i];
   var numEl = document.getElementById('gym-s-' + i);
   numEl.textContent = n;
@@ -1197,6 +1199,22 @@ function gymTap(i) {
   var card = document.getElementById('gym-item-' + i);
   card.className = 'gym-item ' + (n === 1 ? 's1' : n === 2 ? 's2' : 's3plus');
   if (navigator.vibrate) navigator.vibrate(12);
+}
+
+function gymUndo() {
+  if (_gymLastTapped === null) return;
+  var i = _gymLastTapped;
+  if (_gymSeries[i] > 0) {
+    _gymSeries[i]--;
+    var n = _gymSeries[i];
+    var numEl = document.getElementById('gym-s-' + i);
+    numEl.textContent = n === 0 ? '—' : n;
+    if (n === 0) numEl.classList.remove('on');
+    var card = document.getElementById('gym-item-' + i);
+    card.className = 'gym-item' + (n === 0 ? '' : n === 1 ? ' s1' : n === 2 ? ' s2' : ' s3plus');
+    if (navigator.vibrate) navigator.vibrate(8);
+  }
+  _gymLastTapped = null;
 }
 
 function resetGym() {
