@@ -604,9 +604,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <!-- GYM RUTINA -->
 <div class="screen" id="screen-gym">
   <div class="topbar">
-    <div class="topbar-back" onclick="gymUndo()">↩</div>
+    <div class="topbar-back" onclick="closeGym()">←</div>
     <div class="topbar-title" style="font-family:'Playfair Display',serif;font-size:18px">Rutina</div>
-    <div class="topbar-sr" onclick="closeGym()" style="font-size:11px">Atrás</div>
+    <div class="topbar-sr" onclick="gymUndo()" style="font-size:11px">Atrás</div>
   </div>
   <div class="scroll-area">
     <div id="gym-item-0" class="gym-item" onclick="gymTap(0)">
