@@ -1322,6 +1322,21 @@ function stretchToggle(id) {
       var checked = loadCorazonChecked();
       if (!checked[id]) { checked[id] = true; localStorage.setItem(getCorazonKey(), JSON.stringify(checked)); renderCorazon(); }
       if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+      (function() {
+        try {
+          var ctx = new (window.AudioContext || window.webkitAudioContext)();
+          [0, 0.35].forEach(function(t) {
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            osc.type = 'sine'; osc.frequency.value = 660;
+            gain.gain.setValueAtTime(0, ctx.currentTime + t);
+            gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + t + 0.08);
+            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + t + 0.4);
+            osc.start(ctx.currentTime + t); osc.stop(ctx.currentTime + t + 0.4);
+          });
+        } catch(e) {}
+      })();
     }
   }, 1000);
 }
