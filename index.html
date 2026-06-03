@@ -322,6 +322,39 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .auth-links { display: flex; justify-content: space-between; margin-top: 16px; flex-wrap: wrap; gap: 6px; }
 .auth-link { color: var(--text3); font-size: 13px; text-decoration: none; transition: color 0.2s; }
 .auth-link:hover { color: var(--green); }
+
+/* ── CHANO TRAINING SCREEN ── */
+#screen-chano { background: var(--bg); }
+.chano-section-label { font-size: 10px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; font-weight: 500; }
+.chano-readiness-score { font-family: 'Playfair Display', serif; font-size: 64px; line-height: 1; font-weight: 600; }
+.chano-score-green { color: var(--green); }
+.chano-score-amber { color: var(--amber); }
+.chano-score-red { color: var(--red); }
+.chano-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.chano-meta-item { background: var(--bg3); border-radius: var(--radius-xs); padding: 8px 10px; }
+.chano-meta-val { font-size: 17px; font-weight: 600; color: var(--text); }
+.chano-meta-lbl { font-size: 10px; color: var(--text3); margin-top: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+.chano-workout-type { font-size: 18px; font-weight: 600; color: var(--green); margin-bottom: 4px; font-family: 'Playfair Display', serif; }
+.chano-workout-notes { font-size: 13px; color: var(--text2); line-height: 1.5; margin-top: 6px; }
+.chano-status-pill { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; letter-spacing: 0.04em; text-transform: uppercase; margin-top: 8px; }
+.chano-status-planned { background: rgba(251,191,36,0.12); color: var(--amber); border: 0.5px solid rgba(251,191,36,0.3); }
+.chano-status-done { background: var(--greenfaint); color: var(--green); border: 0.5px solid var(--greenborder); }
+.chano-status-rest { background: rgba(255,255,255,0.05); color: var(--text3); border: 0.5px solid rgba(255,255,255,0.1); }
+.chano-week { display: flex; gap: 6px; justify-content: center; margin: 4px 0 8px; }
+.chano-day { display: flex; flex-direction: column; align-items: center; gap: 4px; flex: 1; }
+.chano-day-dot { width: 32px; height: 32px; border-radius: 50%; border: 0.5px solid var(--greenborder); background: var(--card2); display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--text3); transition: all 0.2s; }
+.chano-day-dot.filled { background: var(--green3); border-color: var(--green3); color: #fff; }
+.chano-day-dot.today-dot { background: var(--green); border-color: var(--green); color: #0f1a14; font-weight: 700; box-shadow: 0 0 0 3px rgba(74,222,128,0.25); }
+.chano-day-lbl { font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.04em; }
+.chano-history-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid rgba(255,255,255,0.05); }
+.chano-history-item:last-child { border-bottom: none; }
+.chano-history-date { font-size: 12px; color: var(--text3); }
+.chano-history-type { font-size: 13px; color: var(--text); font-weight: 500; }
+.chano-history-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.chano-history-right { text-align: right; }
+.chano-history-dur { font-size: 14px; font-weight: 600; color: var(--green2); }
+.chano-empty { text-align: center; padding: 24px 0; color: var(--text3); font-size: 13px; }
+.chano-loading { text-align: center; padding: 20px 0; color: var(--text3); font-size: 13px; }
 </style>
 </head>
 <body>
@@ -406,7 +439,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 <div class="screen" id="screen-corazon">
   <div class="topbar">
     <div class="topbar-title" style="font-family:'Playfair Display',serif;font-size:20px">Corazón abierto</div>
-    <div class="topbar-sr" onclick="openSR()">SR &rarr;</div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="topbar-sr" onclick="openChano()">CT &rarr;</div>
+      <div class="topbar-sr" onclick="openSR()">SR &rarr;</div>
+    </div>
   </div>
   <div class="scroll-area">
     <div style="padding:0.25rem 0 1.5rem;text-align:center">
@@ -602,6 +638,43 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 </div>
 
 <!-- GYM RUTINA -->
+<!-- CHANO TRAINING -->
+<div class="screen" id="screen-chano">
+  <div class="topbar">
+    <div class="topbar-back" onclick="closeChano()">←</div>
+    <div class="topbar-title" style="font-family:'Playfair Display',serif;font-size:18px">Chano Training</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="scroll-area" id="chano-scroll">
+
+    <!-- READINESS -->
+    <div class="card">
+      <div class="chano-section-label">Readiness hoy</div>
+      <div id="chano-readiness"><div class="chano-loading">Cargando...</div></div>
+    </div>
+
+    <!-- ENTRENAMIENTO HOY -->
+    <div class="card">
+      <div class="chano-section-label">Entrenamiento del día</div>
+      <div id="chano-workout"><div class="chano-loading">Cargando...</div></div>
+    </div>
+
+    <!-- SEMANA -->
+    <div class="card">
+      <div class="chano-section-label">Esta semana</div>
+      <div id="chano-week"><div class="chano-loading">Cargando...</div></div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="card">
+      <div class="chano-section-label">Últimas actividades</div>
+      <div id="chano-history"><div class="chano-loading">Cargando...</div></div>
+    </div>
+
+    <div style="height:20px"></div>
+  </div>
+</div>
+
 <div class="screen" id="screen-gym" style="background:var(--bg)">
   <div class="topbar">
     <div class="topbar-back" onclick="closeGym()">←</div>
@@ -1900,6 +1973,115 @@ async function bootApp() {
   lang = S.lang || 'es'; t = T[lang];
   if (S.onboarded) { showApp(); }
   else { document.getElementById('screen-onboarding').classList.add('active'); }
+}
+
+// ─── CHANO TRAINING ──────────────────────────────────────
+function openChano() {
+  document.getElementById('screen-corazon').classList.remove('active');
+  document.getElementById('screen-chano').classList.add('active');
+  loadChanoData();
+}
+function closeChano() {
+  document.getElementById('screen-chano').classList.remove('active');
+  document.getElementById('screen-corazon').classList.add('active');
+}
+
+async function loadChanoData() {
+  const today = new Date().toISOString().split('T')[0];
+
+  const [{ data: readiness }, { data: workout }, { data: executed }] = await Promise.all([
+    window._sb.from('daily_readiness')
+      .select('readiness_score,sleep_score,activity_score,hrv_avg,resting_hr,temp_deviation')
+      .eq('date', today).maybeSingle(),
+    window._sb.from('workouts_planned')
+      .select('session_type,notes,status,running_structure')
+      .eq('date', today).maybeSingle(),
+    window._sb.from('workouts_executed')
+      .select('date,session_type,duration_min,distance_km,avg_hr')
+      .order('date', { ascending: false }).limit(14)
+  ]);
+
+  renderChanoReadiness(readiness);
+  renderChanoWorkout(workout);
+  renderChanoWeek(executed || [], today);
+  renderChanoHistory(executed || []);
+}
+
+function renderChanoReadiness(r) {
+  const el = document.getElementById('chano-readiness');
+  if (!r || r.readiness_score == null) {
+    el.innerHTML = '<div class="chano-empty">Sin datos de readiness para hoy</div>'; return;
+  }
+  const s = r.readiness_score;
+  const cls = s >= 75 ? 'chano-score-green' : s >= 55 ? 'chano-score-amber' : 'chano-score-red';
+  const sleepH = r.total_sleep_min ? Math.round(r.total_sleep_min / 60 * 10) / 10 + 'h' : '—';
+  el.innerHTML = `
+    <div class="chano-readiness-score ${cls}">${s}<span style="font-size:20px;color:var(--text3)">/100</span></div>
+    <div class="chano-meta-grid">
+      <div class="chano-meta-item"><div class="chano-meta-val">${r.sleep_score ?? '—'}</div><div class="chano-meta-lbl">Sueño</div></div>
+      <div class="chano-meta-item"><div class="chano-meta-val">${r.activity_score ?? '—'}</div><div class="chano-meta-lbl">Actividad</div></div>
+      <div class="chano-meta-item"><div class="chano-meta-val">${r.hrv_avg != null ? Math.round(r.hrv_avg) + ' ms' : '—'}</div><div class="chano-meta-lbl">HRV</div></div>
+      <div class="chano-meta-item"><div class="chano-meta-val">${r.resting_hr != null ? r.resting_hr + ' bpm' : '—'}</div><div class="chano-meta-lbl">FC reposo</div></div>
+    </div>`;
+}
+
+function renderChanoWorkout(w) {
+  const el = document.getElementById('chano-workout');
+  if (!w) {
+    el.innerHTML = '<div class="chano-empty">No hay entrenamiento planificado para hoy</div>'; return;
+  }
+  const statusMap = { planned: 'planned', completed: 'done', rest: 'rest', skipped: 'rest' };
+  const statusLbl = { planned: 'Planificado', completed: 'Completado', rest: 'Descanso', skipped: 'Omitido' };
+  const sc = statusMap[w.status] || 'planned';
+  const notes = w.notes ? `<div class="chano-workout-notes">${w.notes}</div>` : '';
+  const structure = w.running_structure ? `<div class="chano-workout-notes" style="margin-top:8px;font-size:12px;color:var(--text3)">${w.running_structure}</div>` : '';
+  el.innerHTML = `
+    <div class="chano-workout-type">${w.session_type || 'Entrenamiento'}</div>
+    <span class="chano-status-pill chano-status-${sc}">${statusLbl[w.status] || w.status}</span>
+    ${notes}${structure}`;
+}
+
+function renderChanoWeek(executed, today) {
+  const el = document.getElementById('chano-week');
+  const executedDates = new Set((executed || []).map(e => e.date));
+  const days = [];
+  const dayNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const ymd = d.toISOString().split('T')[0];
+    const isToday = ymd === today;
+    const filled = executedDates.has(ymd);
+    const dotCls = isToday ? 'today-dot' : filled ? 'filled' : '';
+    const icon = filled || isToday ? (filled ? '✓' : '·') : '';
+    days.push(`<div class="chano-day">
+      <div class="chano-day-dot ${dotCls}">${icon}</div>
+      <div class="chano-day-lbl">${dayNames[d.getDay()]}</div>
+    </div>`);
+  }
+  el.innerHTML = `<div class="chano-week">${days.join('')}</div>`;
+}
+
+function renderChanoHistory(executed) {
+  const el = document.getElementById('chano-history');
+  const recent = (executed || []).slice(0, 6);
+  if (!recent.length) { el.innerHTML = '<div class="chano-empty">Sin actividades registradas</div>'; return; }
+  const rows = recent.map(e => {
+    const dateLabel = e.date ? e.date.slice(5).replace('-', '/') : '—';
+    const dur = e.duration_min ? `${e.duration_min} min` : '—';
+    const dist = e.distance_km ? ` · ${e.distance_km} km` : '';
+    return `<div class="chano-history-item">
+      <div>
+        <div class="chano-history-type">${e.session_type || 'Actividad'}</div>
+        <div class="chano-history-meta">${dateLabel}${e.avg_hr ? ' · ' + e.avg_hr + ' bpm' : ''}</div>
+      </div>
+      <div class="chano-history-right">
+        <div class="chano-history-dur">${dur}</div>
+        ${dist ? `<div class="chano-history-meta">${dist.trim()}</div>` : ''}
+      </div>
+    </div>`;
+  });
+  el.innerHTML = rows.join('');
 }
 
 // ─── BOOT ────────────────────────────────────────────────
