@@ -1989,33 +1989,54 @@ function closeChano() {
 async function loadChanoData() {
   const today = new Date().toISOString().split('T')[0];
 
-  const [{ data: readiness }, { data: workout }, { data: executed }] = await Promise.all([
+  const [{ data: readinessToday }, { data: workoutToday }, { data: executed }] = await Promise.all([
     window._sb.from('daily_readiness')
-      .select('readiness_score,sleep_score,activity_score,hrv_avg,resting_hr,temp_deviation')
+      .select('date,readiness_score,sleep_score,activity_score,hrv_avg,resting_hr,temp_deviation')
       .eq('date', today).maybeSingle(),
     window._sb.from('workouts_planned')
-      .select('session_type,notes,status,running_structure')
+      .select('date,session_type,notes,status,running_structure')
       .eq('date', today).maybeSingle(),
     window._sb.from('workouts_executed')
       .select('date,session_type,duration_min,distance_km,avg_hr')
       .order('date', { ascending: false }).limit(14)
   ]);
 
-  renderChanoReadiness(readiness);
-  renderChanoWorkout(workout);
+  // Si no hay dato de hoy, buscar el más reciente disponible
+  let readiness = readinessToday;
+  if (!readiness) {
+    const { data: latest } = await window._sb.from('daily_readiness')
+      .select('date,readiness_score,sleep_score,activity_score,hrv_avg,resting_hr,temp_deviation')
+      .order('date', { ascending: false }).limit(1).maybeSingle();
+    readiness = latest;
+  }
+
+  let workout = workoutToday;
+  if (!workout) {
+    const { data: latest } = await window._sb.from('workouts_planned')
+      .select('date,session_type,notes,status,running_structure')
+      .order('date', { ascending: false }).limit(1).maybeSingle();
+    workout = latest;
+  }
+
+  renderChanoReadiness(readiness, today);
+  renderChanoWorkout(workout, today);
   renderChanoWeek(executed || [], today);
   renderChanoHistory(executed || []);
 }
 
-function renderChanoReadiness(r) {
+function renderChanoReadiness(r, today) {
   const el = document.getElementById('chano-readiness');
   if (!r || r.readiness_score == null) {
-    el.innerHTML = '<div class="chano-empty">Sin datos de readiness para hoy</div>'; return;
+    el.innerHTML = '<div class="chano-empty">Sin datos de readiness — sincronizá Oura</div>'; return;
   }
   const s = r.readiness_score;
   const cls = s >= 75 ? 'chano-score-green' : s >= 55 ? 'chano-score-amber' : 'chano-score-red';
-  const sleepH = r.total_sleep_min ? Math.round(r.total_sleep_min / 60 * 10) / 10 + 'h' : '—';
+  const isOld = r.date && r.date !== today;
+  const dateTag = isOld
+    ? `<div style="font-size:11px;color:var(--amber);margin-bottom:8px">⚠ Último sync: ${r.date.slice(5).replace('-','/')}</div>`
+    : '';
   el.innerHTML = `
+    ${dateTag}
     <div class="chano-readiness-score ${cls}">${s}<span style="font-size:20px;color:var(--text3)">/100</span></div>
     <div class="chano-meta-grid">
       <div class="chano-meta-item"><div class="chano-meta-val">${r.sleep_score ?? '—'}</div><div class="chano-meta-lbl">Sueño</div></div>
@@ -2025,17 +2046,22 @@ function renderChanoReadiness(r) {
     </div>`;
 }
 
-function renderChanoWorkout(w) {
+function renderChanoWorkout(w, today) {
   const el = document.getElementById('chano-workout');
   if (!w) {
-    el.innerHTML = '<div class="chano-empty">No hay entrenamiento planificado para hoy</div>'; return;
+    el.innerHTML = '<div class="chano-empty">Sin entrenamiento planificado</div>'; return;
   }
   const statusMap = { planned: 'planned', completed: 'done', rest: 'rest', skipped: 'rest' };
   const statusLbl = { planned: 'Planificado', completed: 'Completado', rest: 'Descanso', skipped: 'Omitido' };
   const sc = statusMap[w.status] || 'planned';
+  const isOld = w.date && w.date !== today;
+  const dateTag = isOld
+    ? `<div style="font-size:11px;color:var(--text3);margin-bottom:6px">${w.date.slice(5).replace('-','/')}</div>`
+    : '';
   const notes = w.notes ? `<div class="chano-workout-notes">${w.notes}</div>` : '';
   const structure = w.running_structure ? `<div class="chano-workout-notes" style="margin-top:8px;font-size:12px;color:var(--text3)">${w.running_structure}</div>` : '';
   el.innerHTML = `
+    ${dateTag}
     <div class="chano-workout-type">${w.session_type || 'Entrenamiento'}</div>
     <span class="chano-status-pill chano-status-${sc}">${statusLbl[w.status] || w.status}</span>
     ${notes}${structure}`;
