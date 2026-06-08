@@ -1075,6 +1075,9 @@ let S = JSON.parse(localStorage.getItem('renovar_v1') || 'null') || {
 if (S.todayMood && !S.todayMoods) S.todayMoods = [S.todayMood];
 if (!S.todayMoods) S.todayMoods = [];
 if (!S.todayActions) S.todayActions = [];
+// migrate to startDate model: derive a start date so the streak counts automatically
+if (!S.startDate) S.startDate = dateMinusDays(S.days || 0);
+recomputeDays();
 let lang = S.lang || 'es';
 let t = T[lang];
 let recognition = null;
@@ -1093,6 +1096,7 @@ function onbLangChange() {
 function completeOnboarding() {
   const days = parseInt(document.getElementById('onb-days').value) || 0;
   S.lang = document.getElementById('onb-lang').value;
+  S.startDate = dateMinusDays(days);
   S.days = days;
   S.onboarded = true;
   lang = S.lang;
@@ -1105,6 +1109,25 @@ function completeOnboarding() {
 function localDate() {
   var d = new Date();
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+// ─── STREAK (date-based) ─────────────────────────────────
+// The streak is derived from S.startDate so it advances on its own every day.
+function dateMinusDays(n) {
+  var d = new Date();
+  d.setDate(d.getDate() - (n || 0));
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
+function daysSince(iso) {
+  if (!iso) return 0;
+  var p = iso.split('-');
+  var start = new Date(+p[0], +p[1]-1, +p[2]);
+  var now = new Date();
+  var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.floor((today - start) / 86400000));
+}
+function recomputeDays() {
+  if (!S.startDate) S.startDate = dateMinusDays(S.days || 0);
+  S.days = daysSince(S.startDate);
 }
 function getCorazonKey() {
   return 'corazon_' + localDate();
@@ -1530,6 +1553,7 @@ function applyLang() {
 }
 
 function render() {
+  recomputeDays();
   const days = S.days;
   document.getElementById('dayNum').textContent = days;
   const v = VERSES[lang][days % VERSES[lang].length];
@@ -1661,16 +1685,17 @@ function toggleMood(m) {
 function saveDay() {
   const note = document.getElementById('noteInput').value.trim();
   const today = localDate();
+  recomputeDays();
   S.log = S.log || [];
   const existing = S.log.findIndex(e => e.date === today);
   const entry = {
-    day: S.days + 1, date: today, lang,
+    day: S.days, date: today, lang,
     moods: [...(S.todayMoods||[])], victory: S.todayVictory,
     causes: [...(S.todayCauses || [])], time: S.todayTime,
     actions: [...(S.todayActions||[])], note
   };
   if (existing >= 0) { S.log[existing] = entry; }
-  else { S.log.push(entry); S.days++; }
+  else { S.log.push(entry); }
   S.todayMoods = []; S.todayVictory = null; S.todayCauses = []; S.todayTime = null; S.todayActions = [];
   document.getElementById('noteInput').value = '';
   document.getElementById('hadTemSection')?.classList.remove('visible');
@@ -1682,6 +1707,7 @@ function saveDay() {
 
 function resetStreak() {
   if (!confirm(t.confirmReset)) return;
+  S.startDate = localDate();
   S.days = 0;
   S.todayMoods = []; S.todayVictory = null; S.todayCauses = []; S.todayTime = null; S.todayActions = [];
   save();
@@ -1787,6 +1813,7 @@ function changeLang(l) {
 function setManualDay() {
   const val = parseInt(document.getElementById('settings-day-input').value);
   if (isNaN(val) || val < 0) return;
+  S.startDate = dateMinusDays(val);
   S.days = val;
   save();
   render();
@@ -1951,17 +1978,20 @@ async function bootApp() {
   // Load from Supabase
   const { data } = await window._sb.from('renovar_data').select('data').eq('user_id', user.id).maybeSingle();
   if (data) {
-    const localDays = S.days || 0;
-    const remoteDays = (data.data && data.data.days) || 0;
+    const localStart = S.startDate;
+    const remoteStart = (data.data && data.data.startDate) || dateMinusDays((data.data && data.data.days) || 0);
     const localSavedAt = S.lastSavedAt || '';
     const remoteSavedAt = (data.data && data.data.lastSavedAt) || '';
     S = { ...S, ...data.data };
+    // remote may be old data without startDate — migrate it from its days
+    if (!S.startDate) S.startDate = remoteStart;
     // Local wins if it was saved more recently (covers manual overrides and failed syncs)
-    if (localSavedAt >= remoteSavedAt) {
-      S.days = localDays;
+    if (localSavedAt >= remoteSavedAt && localStart) {
+      S.startDate = localStart;
       S.lastSavedAt = localSavedAt;
-      if (localDays !== remoteDays) syncToSupabase();
     }
+    recomputeDays();
+    if (S.startDate !== remoteStart) syncToSupabase();
   } else if (S.onboarded) {
     await window._sb.from('renovar_data').insert({ user_id: user.id, data: S });
   }
