@@ -6,8 +6,8 @@
   "start_url": "https://lucianobritez019-dotcom.github.io/renovar-app-sr/",
   "scope": "https://lucianobritez019-dotcom.github.io/renovar-app-sr/",
   "display": "standalone",
-  "background_color": "#0f1a14",
-  "theme_color": "#0f1a14",
+  "background_color": "#0e1a26",
+  "theme_color": "#0e1a26",
   "orientation": "portrait",
   "icons": [
     { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
