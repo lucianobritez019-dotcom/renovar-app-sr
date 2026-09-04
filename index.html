@@ -485,9 +485,9 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <div id="corazon-item-2" class="corazon-item" onclick="toggleCorazon(2)">
       <div class="corazon-check" id="corazon-chk-2"></div>
       <div style="flex:1">
-        <div class="corazon-cat">Centro</div>
-        <div class="corazon-action">Notás sin reaccionar</div>
-        <div class="corazon-desc">Cuando algo te descentre, lo nombrás internamente, respirás profundo, y seguís. El dolor no es el problema. Escapar de él sí.</div>
+        <div class="corazon-cat">Contenido</div>
+        <div class="corazon-action">Cuidás lo que consumís</div>
+        <div class="corazon-desc">Lo que entra por los ojos programa lo que salís a buscar. Filtrás antes de scrollear.</div>
       </div>
     </div>
 
@@ -503,51 +503,36 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     <div id="corazon-item-4" class="corazon-item" onclick="toggleCorazon(4)">
       <div class="corazon-check" id="corazon-chk-4"></div>
       <div style="flex:1">
-        <div class="corazon-cat">Estiramiento</div>
-        <div class="corazon-action">Wall Pec Stretch — brazo derecho</div>
-        <div class="corazon-desc">Brazo derecho completamente extendido contra la pared, girá el tronco hacia la izquierda. Mantené.</div>
-        <div class="stretch-timer-row" onclick="event.stopPropagation()">
-          <div class="stretch-time-display" id="stretch-time-4">1:00</div>
-          <button class="stretch-ctrl" id="stretch-ctrl-4" onclick="stretchToggle(4)">▶</button>
-          <div class="stretch-done-text" id="stretch-done-4">Completado ✓</div>
-        </div>
+        <div class="corazon-cat">Gratitud</div>
+        <div class="corazon-action">Gratitude journaling</div>
+        <div class="corazon-desc">Escribí o decí 3 o más cosas por las que te sentís agradecido hoy.</div>
       </div>
     </div>
 
     <div id="corazon-item-5" class="corazon-item" onclick="toggleCorazon(5)">
       <div class="corazon-check" id="corazon-chk-5"></div>
       <div style="flex:1">
-        <div class="corazon-cat">Estiramiento</div>
-        <div class="corazon-action">Wall Pec Stretch — brazo izquierdo</div>
-        <div class="corazon-desc">Brazo izquierdo completamente extendido contra la pared, girá el tronco hacia la derecha. Mantené.</div>
-        <div class="stretch-timer-row" onclick="event.stopPropagation()">
-          <div class="stretch-time-display" id="stretch-time-5">1:00</div>
-          <button class="stretch-ctrl" id="stretch-ctrl-5" onclick="stretchToggle(5)">▶</button>
-          <div class="stretch-done-text" id="stretch-done-5">Completado ✓</div>
-        </div>
+        <div class="corazon-cat">Redes</div>
+        <div class="corazon-action">Cuidás tus likes y a quién seguís</div>
+        <div class="corazon-desc">Tu feed es un espejo de tu cabeza. Lo curás con la misma disciplina que todo lo demás.</div>
       </div>
     </div>
 
     <div id="corazon-item-6" class="corazon-item" onclick="toggleCorazon(6)">
       <div class="corazon-check" id="corazon-chk-6"></div>
       <div style="flex:1">
-        <div class="corazon-cat">Estiramiento</div>
-        <div class="corazon-action">Forearm Stretch</div>
-        <div class="corazon-desc">Brazo completamente extendido al frente, con la otra mano jalá los dedos hacia atrás. Mantené.</div>
-        <div class="stretch-timer-row" onclick="event.stopPropagation()">
-          <div class="stretch-time-display" id="stretch-time-6">1:00</div>
-          <button class="stretch-ctrl" id="stretch-ctrl-6" onclick="stretchToggle(6)">▶</button>
-          <div class="stretch-done-text" id="stretch-done-6">Completado ✓</div>
-        </div>
+        <div class="corazon-cat">Exclusividad</div>
+        <div class="corazon-action">Sos más exclusivo</div>
+        <div class="corazon-desc">No repartís tu tiempo ni tu atención. Lo que das, lo das con criterio.</div>
       </div>
     </div>
 
     <div id="corazon-item-7" class="corazon-item" onclick="toggleCorazon(7)">
       <div class="corazon-check" id="corazon-chk-7"></div>
       <div style="flex:1">
-        <div class="corazon-cat">Gratitud</div>
-        <div class="corazon-action">Gratitude journaling</div>
-        <div class="corazon-desc">Escribí o decí 3 o más cosas por las que te sentís agradecido hoy.</div>
+        <div class="corazon-cat">Atracción</div>
+        <div class="corazon-action">Atraés, no buscás</div>
+        <div class="corazon-desc">Construís tu vida y dejás que lo bueno llegue. No perseguís lo que no elige quedarse.</div>
       </div>
     </div>
 
@@ -1150,13 +1135,6 @@ function renderCorazon() {
   renderMedMin();
   renderAllActivities();
   renderPose();
-  [4, 5, 6].forEach(function(id) {
-    if (checked[id]) {
-      _stretchDone[id] = true;
-      document.getElementById('stretch-done-' + id).classList.add('visible');
-      document.getElementById('stretch-ctrl-' + id).textContent = '↺';
-    }
-  });
   document.getElementById('corazon-banner').classList.toggle('visible', checked.every(Boolean));
 }
 
@@ -1202,27 +1180,24 @@ function renderCorazonVerse() {
 
 // ─── AFIRMACIONES DIARIAS ────────────────────────────────
 const AFIRMACIONES = [
-  'Dios me tiene preparado algo tan grande que si lo viese hoy no lo creería.',
-  'Estoy parado en mi centro aunque duela.',
-  'Construyo hoy sin esperar que todo esté resuelto.',
-  'Amo con el corazón abierto y sin necesitar controlar.',
-  'Soy guiado por algo más grande que mis emociones del momento.',
-  'Confío en lo que Dios tiene para mí. Acciono con fe y suelto el resultado.',
-  'Mi historia no me define, me formó.',
-  'Lo que fui ayer no limita lo que elijo ser hoy.',
-  'El prejuicio me cierra puertas que Dios quizás abrió. Elijo ver con ojos nuevos.',
-  'El dolor no es el enemigo, escapar de él sí.',
-  'Esto también va a pasar. Sigo de pie.',
-  'Sentir profundo es señal de que viví algo real.',
-  'Observo lo que siento, no soy lo que siento.',
-  'Soy hijo de Dios. Eso no cambia con lo que siento, lo que pasó, ni lo que viene.',
-  'Jesús ya pagó por mis errores. No cargo culpa que ya fue perdonada.',
-  'Dios no me abandonó en lo más difícil. No me va a abandonar ahora.',
-  'Fui creado con propósito. No estoy acá por casualidad.',
-  'Mi valor no viene de lo que logro ni de quién me ama. Viene de quién me creó.',
-  'Mi cuerpo habla antes que mi boca. Ocupo el espacio con calma y sin disculparme.',
-  'Cada persona que cruzo merece amor. No juzgo su pasado ni sus heridas.',
-  'Si Dios está conmigo, ¿quién contra mí?'
+  'Atraigo buenas mujeres a mi vida sin esfuerzo.',
+  'No busco, atraigo. Mi energía habla antes que mis palabras.',
+  'Soy selectivo con quién dejo entrar en mi vida.',
+  'La abundancia es mi estado natural, no la excepción.',
+  'Mi valor no depende de la validación externa.',
+  'Cuido lo que consumo porque eso es lo que termino siendo.',
+  'Soy exclusivo con mi tiempo, mi energía y mi atención.',
+  'Lo que persigo se aleja. Lo que construyo se acerca.',
+  'Mi disciplina de hoy es mi libertad de mañana.',
+  'No necesito a nadie para sentirme completo, y eso me hace magnético.',
+  'Elijo calidad sobre cantidad en todo lo que dejo entrar.',
+  'Mi presencia es suficiente. No tengo que demostrar nada.',
+  'Retengo mi energía para lo que realmente importa.',
+  'Construyo algo real y lo demás llega solo.',
+  'Soy dueño de mi atención: mis likes, mis seguidos, mi tiempo.',
+  'La escasez no me define. Vivo desde la abundancia.',
+  'Cuanto más me enfoco en mí, más se ordena todo lo demás.',
+  'Soy el hombre que atrae lo que antes salía a buscar.'
 ];
 
 function getAfirmKey() {
@@ -1376,65 +1351,6 @@ function medStep(dir) {
 function renderMedMin() {
   var el = document.getElementById('med-min');
   if (el) el.textContent = getMedMin();
-}
-
-// ─── STRETCH TIMERS ──────────────────────────────────────
-var _stretchTimers = {};
-var _stretchSecs = { 4: 60, 5: 60, 6: 60 };
-var _stretchDone = { 4: false, 5: false, 6: false };
-
-function stretchToggle(id) {
-  if (_stretchDone[id]) {
-    _stretchSecs[id] = 60;
-    _stretchDone[id] = false;
-    document.getElementById('stretch-time-' + id).textContent = '1:00';
-    document.getElementById('stretch-ctrl-' + id).textContent = '▶';
-    document.getElementById('stretch-ctrl-' + id).classList.remove('running');
-    document.getElementById('stretch-done-' + id).classList.remove('visible');
-    return;
-  }
-  if (_stretchTimers[id]) {
-    clearInterval(_stretchTimers[id]);
-    _stretchTimers[id] = null;
-    document.getElementById('stretch-ctrl-' + id).textContent = '▶';
-    document.getElementById('stretch-ctrl-' + id).classList.remove('running');
-    return;
-  }
-  document.getElementById('stretch-ctrl-' + id).textContent = '⏸';
-  document.getElementById('stretch-ctrl-' + id).classList.add('running');
-  _stretchTimers[id] = setInterval(function() {
-    _stretchSecs[id]--;
-    var s = _stretchSecs[id];
-    document.getElementById('stretch-time-' + id).textContent =
-      Math.floor(s / 60) + ':' + (s % 60 < 10 ? '0' : '') + (s % 60);
-    if (s <= 0) {
-      clearInterval(_stretchTimers[id]);
-      _stretchTimers[id] = null;
-      _stretchDone[id] = true;
-      document.getElementById('stretch-time-' + id).textContent = '1:00';
-      document.getElementById('stretch-ctrl-' + id).textContent = '↺';
-      document.getElementById('stretch-ctrl-' + id).classList.remove('running');
-      document.getElementById('stretch-done-' + id).classList.add('visible');
-      var checked = loadCorazonChecked();
-      if (!checked[id]) { checked[id] = true; localStorage.setItem(getCorazonKey(), JSON.stringify(checked)); renderCorazon(); }
-      if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
-      (function() {
-        try {
-          var ctx = new (window.AudioContext || window.webkitAudioContext)();
-          [0, 0.35].forEach(function(t) {
-            var osc = ctx.createOscillator();
-            var gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'sine'; osc.frequency.value = 660;
-            gain.gain.setValueAtTime(0, ctx.currentTime + t);
-            gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + t + 0.08);
-            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + t + 0.4);
-            osc.start(ctx.currentTime + t); osc.stop(ctx.currentTime + t + 0.4);
-          });
-        } catch(e) {}
-      })();
-    }
-  }, 1000);
 }
 
 // ─── POWER POSE ──────────────────────────────────────────
