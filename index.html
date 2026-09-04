@@ -213,7 +213,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
 /* AFIRMACIONES */
 .afirm-section { margin-top:14px; }
-.afirm-header { font-size:10px; color:var(--text3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; }
+.afirm-header { font-size:10px; color:var(--text3); letter-spacing:0.12em; text-transform:uppercase; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.afirm-expand-btn { text-transform:none; letter-spacing:0; font-size:12px; color:var(--green); cursor:pointer; padding:4px 0; -webkit-tap-highlight-color:transparent; }
 .afirm-card { background:var(--card); border:0.5px solid var(--greenborder); border-radius:var(--radius); padding:1.5rem 1.25rem; position:relative; }
 .afirm-counter { font-size:11px; color:var(--text3); letter-spacing:0.08em; margin-bottom:14px; }
 .afirm-text { font-family:'Playfair Display',serif; font-style:italic; font-size:17px; color:var(--text); line-height:1.65; }
@@ -221,14 +222,20 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .afirm-dot { width:6px; height:6px; border-radius:50%; background:var(--card2); border:0.5px solid var(--greenborder); transition:all 0.2s; }
 .afirm-dot.active { background:var(--green); border-color:var(--green); }
 .afirm-dot.done { background:var(--green3); border-color:var(--green3); }
-.afirm-nav { display:flex; gap:10px; justify-content:center; align-items:center; }
-.afirm-arrow { width:44px; height:44px; border-radius:50%; border:0.5px solid var(--greenborder); background:transparent; color:var(--green); font-size:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; flex-shrink:0; }
+.afirm-nav { display:flex; gap:16px; justify-content:center; align-items:center; }
+.afirm-arrow { width:56px; height:56px; border-radius:50%; border:0.5px solid var(--greenborder); background:transparent; color:var(--green); font-size:26px; display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; flex-shrink:0; -webkit-tap-highlight-color:transparent; }
 .afirm-arrow:active { background:var(--greenfaint); transform:scale(0.92); }
 .afirm-arrow:disabled { opacity:0.2; pointer-events:none; }
 .afirm-all-done { text-align:center; padding:0.5rem 0 0; font-size:13px; color:var(--text3); display:none; }
 .afirm-all-done.visible { display:block; }
 .afirm-reset-btn { display:block; margin:16px auto 0; padding:8px 18px; background:transparent; border:0.5px solid var(--greenborder); border-radius:20px; color:var(--text3); font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
 .afirm-reset-btn:active { background:var(--greenfaint); color:var(--green); transform:scale(0.96); }
+
+/* AFIRMACIONES — FOCO PANTALLA COMPLETA */
+#screen-afirm-focus .scroll-area { display:flex; flex-direction:column; justify-content:center; align-items:stretch; padding:20px; }
+.afirm-focus-card { text-align:center; }
+.afirm-text-focus { font-family:'Playfair Display',serif; font-style:italic; font-size:24px; color:var(--text); line-height:1.6; margin-bottom:8px; }
+.afirm-arrow-lg { width:72px; height:72px; font-size:32px; }
 
 /* MEDITATION MINUTES */
 .med-row { display:flex; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:0.5px solid rgba(255,255,255,0.05); }
@@ -419,7 +426,10 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   <div class="scroll-area">
     <!-- AFIRMACIONES DIARIAS -->
     <div class="afirm-section" style="margin-top:0">
-      <div class="afirm-header">Afirmaciones diarias</div>
+      <div class="afirm-header">
+        <span>Afirmaciones diarias</span>
+        <span class="afirm-expand-btn" onclick="openAfirmFocus()">⤢ Concentrarme</span>
+      </div>
       <div class="afirm-card">
         <div class="afirm-counter" id="afirm-counter">1 / 18</div>
         <div class="afirm-text" id="afirm-text"></div>
@@ -586,6 +596,28 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <button class="act-log-btn" id="rlt-btn" onclick="actLog('rlt')" disabled>Registrar sesión</button>
         <div class="act-history" id="rlt-history"></div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- AFIRMACIONES — FOCO PANTALLA COMPLETA -->
+<div class="screen" id="screen-afirm-focus">
+  <div class="topbar">
+    <div class="topbar-back" onclick="closeAfirmFocus()">←</div>
+    <div class="topbar-title" style="font-family:'Playfair Display',serif;font-size:18px">Afirmaciones</div>
+    <div style="width:36px"></div>
+  </div>
+  <div class="scroll-area">
+    <div class="afirm-focus-card">
+      <div class="afirm-counter" id="afirm-counter-2">1 / 18</div>
+      <div class="afirm-text-focus" id="afirm-text-2"></div>
+      <div class="afirm-dots" id="afirm-dots-2"></div>
+      <div class="afirm-nav" style="margin-top:8px">
+        <button class="afirm-arrow afirm-arrow-lg" id="afirm-prev-2" onclick="afirmNav(-1)">←</button>
+        <button class="afirm-arrow afirm-arrow-lg" id="afirm-next-2" onclick="afirmNav(1)">→</button>
+      </div>
+      <div class="afirm-all-done" id="afirm-all-done-2">Completaste todas las afirmaciones de hoy ✓</div>
+      <button class="afirm-reset-btn" onclick="afirmReset()">↺ Reiniciar afirmaciones</button>
     </div>
   </div>
 </div>
@@ -1114,21 +1146,27 @@ function saveAfirmIdx(idx) {
 function renderAfirm() {
   var idx = getAfirmIdx();
   var total = AFIRMACIONES.length;
-  document.getElementById('afirm-text').textContent = '“' + AFIRMACIONES[idx] + '”';
-  document.getElementById('afirm-counter').textContent = (idx + 1) + ' / ' + total;
-  var prevBtn = document.getElementById('afirm-prev');
-  var nextBtn = document.getElementById('afirm-next');
-  var allDone = document.getElementById('afirm-all-done');
-  prevBtn.disabled = idx === 0;
-  nextBtn.disabled = idx === total - 1;
-  allDone.classList.toggle('visible', idx === total - 1);
-  var dotsEl = document.getElementById('afirm-dots');
-  dotsEl.innerHTML = '';
-  for (var i = 0; i < total; i++) {
-    var d = document.createElement('div');
-    d.className = 'afirm-dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
-    dotsEl.appendChild(d);
-  }
+  var text = '“' + AFIRMACIONES[idx] + '”';
+  var counter = (idx + 1) + ' / ' + total;
+  ['', '-2'].forEach(function(suf) {
+    var textEl = document.getElementById('afirm-text' + suf);
+    if (!textEl) return;
+    textEl.textContent = text;
+    document.getElementById('afirm-counter' + suf).textContent = counter;
+    var prevBtn = document.getElementById('afirm-prev' + suf);
+    var nextBtn = document.getElementById('afirm-next' + suf);
+    var allDone = document.getElementById('afirm-all-done' + suf);
+    prevBtn.disabled = idx === 0;
+    nextBtn.disabled = idx === total - 1;
+    allDone.classList.toggle('visible', idx === total - 1);
+    var dotsEl = document.getElementById('afirm-dots' + suf);
+    dotsEl.innerHTML = '';
+    for (var i = 0; i < total; i++) {
+      var d = document.createElement('div');
+      d.className = 'afirm-dot' + (i < idx ? ' done' : i === idx ? ' active' : '');
+      dotsEl.appendChild(d);
+    }
+  });
 }
 
 function afirmNav(dir) {
@@ -1144,6 +1182,18 @@ function afirmReset() {
   saveAfirmIdx(0);
   renderAfirm();
   if (navigator.vibrate) navigator.vibrate(10);
+}
+
+function openAfirmFocus() {
+  document.getElementById('screen-corazon').classList.remove('active');
+  document.getElementById('screen-afirm-focus').classList.add('active');
+  renderAfirm();
+}
+
+function closeAfirmFocus() {
+  document.getElementById('screen-afirm-focus').classList.remove('active');
+  document.getElementById('screen-corazon').classList.add('active');
+  renderAfirm();
 }
 
 // ─── ACTIVIDADES ─────────────────────────────────────────
