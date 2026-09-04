@@ -409,12 +409,12 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 
 <!-- CORAZÓN ABIERTO (PANTALLA PRINCIPAL) -->
 <div class="screen" id="screen-corazon">
-  <div class="topbar">
-    <div class="topbar-title" style="font-family:'Playfair Display',serif;font-size:20px">Corazón abierto</div>
-    <div style="display:flex;gap:8px;align-items:center">
+  <div class="topbar" style="flex-direction:column;align-items:stretch;gap:10px">
+    <div style="display:flex;justify-content:flex-end;gap:8px">
       <div class="topbar-sr" onclick="openChano()">CT &rarr;</div>
       <div class="topbar-sr" onclick="openSR()">SR &rarr;</div>
     </div>
+    <div class="topbar-title" style="font-family:'Playfair Display',serif;font-style:italic;font-size:17px;line-height:1.35">Cuidá tu corazón sobre todas las cosas</div>
   </div>
   <div class="scroll-area">
     <!-- AFIRMACIONES DIARIAS -->
