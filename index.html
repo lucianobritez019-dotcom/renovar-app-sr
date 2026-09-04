@@ -69,6 +69,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .day-hero { text-align: center; padding: 1.5rem 0 1rem; }
 .day-num { font-family: 'Playfair Display', serif; font-size: 80px; line-height: 1; color: var(--green); }
 .day-word { font-size: 13px; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 4px; }
+.day-start { font-size: 12px; color: var(--text3); margin-top: 8px; }
 .streak-dots { display: flex; gap: 5px; flex-wrap: wrap; justify-content: center; margin: 1rem auto; max-width: 280px; }
 .dot { width: 18px; height: 18px; border-radius: 50%; background: var(--card2); border: 0.5px solid var(--greenborder); transition: background 0.3s; }
 .dot.filled { background: var(--green3); border-color: var(--green3); }
@@ -117,17 +118,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .fall-chip { padding: 9px 8px; border-radius: var(--radius-xs); border: 0.5px solid rgba(255,255,255,0.07); background: var(--card2); font-size: 12px; color: var(--text2); text-align: center; cursor: pointer; transition: all 0.15s; }
 .fall-chip.sel { background: var(--redfaint); border-color: var(--redborder); color: var(--red); }
 
-/* VOICE NOTE */
-.voice-row { display: flex; gap: 8px; align-items: flex-start; }
-.voice-btn { width: 42px; height: 42px; border-radius: 50%; border: 0.5px solid var(--greenborder); background: var(--card2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; flex-shrink: 0; transition: all 0.2s; margin-top: 1px; }
-.voice-btn.recording { background: var(--redfaint); border-color: var(--redborder); animation: pulse 1s infinite; }
-@keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(248,113,113,0.3); } 50% { box-shadow: 0 0 0 6px rgba(248,113,113,0); } }
-.note-area { flex: 1; padding: 10px 12px; background: var(--card2); border: 0.5px solid rgba(255,255,255,0.07); border-radius: var(--radius-xs); color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; resize: none; min-height: 80px; }
-.note-area::placeholder { color: var(--text3); }
-
-/* SAVE BTN */
-.save-btn { width: 100%; padding: 14px; background: var(--green); border: none; border-radius: var(--radius-sm); color: #0e1a26; font-size: 15px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 4px; transition: background 0.2s; }
-.save-btn:active { background: var(--green2); }
+/* RESET BTN */
 .reset-btn { width: 100%; padding: 11px; background: transparent; border: 0.5px solid var(--redborder); border-radius: var(--radius-sm); color: var(--red); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; margin-top: 8px; }
 
 /* BOTTOM NAV */
@@ -236,6 +227,8 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .afirm-arrow:disabled { opacity:0.2; pointer-events:none; }
 .afirm-all-done { text-align:center; padding:0.5rem 0 0; font-size:13px; color:var(--text3); display:none; }
 .afirm-all-done.visible { display:block; }
+.afirm-reset-btn { display:block; margin:16px auto 0; padding:8px 18px; background:transparent; border:0.5px solid var(--greenborder); border-radius:20px; color:var(--text3); font-size:12px; font-family:'DM Sans',sans-serif; cursor:pointer; transition:all 0.15s; -webkit-tap-highlight-color:transparent; }
+.afirm-reset-btn:active { background:var(--greenfaint); color:var(--green); transform:scale(0.96); }
 
 /* MEDITATION MINUTES */
 .med-row { display:flex; align-items:center; gap:10px; margin-top:10px; padding-top:10px; border-top:0.5px solid rgba(255,255,255,0.05); }
@@ -275,27 +268,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 .sleep-item:last-child { border-bottom:none; padding-bottom:2px; }
 .sleep-dot { width:6px; height:6px; border-radius:50%; background:var(--green3); flex-shrink:0; margin-top:7px; }
 .sleep-text { font-size:14px; color:var(--text2); line-height:1.55; }
-
-/* GYM */
-.gym-entry { display:flex; align-items:center; justify-content:space-between; padding:11px 14px; background:var(--card); border:0.5px solid var(--greenborder); border-radius:var(--radius-sm); margin-bottom:10px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
-.gym-entry:active { background:var(--card2); }
-.gym-entry-label { font-size:13px; color:var(--text2); font-weight:500; }
-.gym-entry-arrow { font-size:13px; color:var(--green); }
-.gym-item { background:var(--card); border:0.5px solid rgba(255,255,255,0.06); border-radius:var(--radius); padding:1rem 1.125rem; margin-bottom:10px; display:flex; align-items:flex-start; gap:14px; cursor:pointer; transition:background 0.15s, border-color 0.15s; -webkit-tap-highlight-color:transparent; user-select:none; }
-.gym-item:active { transform:scale(0.98); }
-.gym-item.s1 { background:rgba(56,189,248,0.05); border-color:rgba(56,189,248,0.15); }
-.gym-item.s2 { background:rgba(56,189,248,0.10); border-color:rgba(56,189,248,0.25); }
-.gym-item.s3plus { background:var(--greenfaint); border-color:var(--greenborder); }
-.gym-info { flex:1; }
-.gym-name { font-family:'Playfair Display',serif; font-size:15px; color:var(--text); line-height:1.35; margin-bottom:4px; }
-.gym-desc { font-size:12px; color:var(--text3); line-height:1.5; }
-.gym-badge { display:flex; flex-direction:column; align-items:center; flex-shrink:0; min-width:36px; }
-.gym-badge-num { font-family:'Playfair Display',serif; font-size:26px; line-height:1; color:var(--text3); transition:color 0.2s; }
-.gym-badge-num.on { color:var(--green); }
-.gym-badge-lbl { font-size:9px; color:var(--text3); letter-spacing:0.08em; text-transform:uppercase; margin-top:2px; }
-.gym-footer { display:flex; gap:8px; margin-top:4px; }
-.gym-reset-btn { flex:1; padding:11px; border-radius:var(--radius-sm); border:0.5px solid rgba(255,255,255,0.08); background:transparent; color:var(--text3); font-size:13px; font-family:'DM Sans',sans-serif; cursor:pointer; }
-.gym-reset-btn:active { background:var(--card2); }
 
 /* ACTIVIDADES */
 .act-section { margin-top:14px; }
@@ -445,13 +417,24 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
     </div>
   </div>
   <div class="scroll-area">
-    <div style="padding:0.25rem 0 1.5rem;text-align:center">
-      <div id="corazon-date-label" style="font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:capitalize"></div>
+    <!-- AFIRMACIONES DIARIAS -->
+    <div class="afirm-section" style="margin-top:0">
+      <div class="afirm-header">Afirmaciones diarias</div>
+      <div class="afirm-card">
+        <div class="afirm-counter" id="afirm-counter">1 / 18</div>
+        <div class="afirm-text" id="afirm-text"></div>
+        <div class="afirm-dots" id="afirm-dots"></div>
+        <div class="afirm-nav">
+          <button class="afirm-arrow" id="afirm-prev" onclick="afirmNav(-1)">←</button>
+          <button class="afirm-arrow" id="afirm-next" onclick="afirmNav(1)">→</button>
+        </div>
+        <div class="afirm-all-done" id="afirm-all-done">Completaste todas las afirmaciones de hoy ✓</div>
+        <button class="afirm-reset-btn" onclick="afirmReset()">↺ Reiniciar afirmaciones</button>
+      </div>
     </div>
 
-    <div class="gym-entry" onclick="openGym()">
-      <span class="gym-entry-label">Rutina de gym</span>
-      <span class="gym-entry-arrow">Ver →</span>
+    <div style="padding:0.25rem 0 1.5rem;text-align:center">
+      <div id="corazon-date-label" style="font-size:12px;color:var(--text3);letter-spacing:0.1em;text-transform:capitalize"></div>
     </div>
 
     <div id="corazon-item-0" class="corazon-item" onclick="toggleCorazon(0)">
@@ -545,21 +528,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div style="font-size:12px;color:var(--text3);margin-top:8px" id="corazon-verse-ref"></div>
     </div>
 
-    <!-- AFIRMACIONES DIARIAS -->
-    <div class="afirm-section">
-      <div class="afirm-header">Afirmaciones diarias</div>
-      <div class="afirm-card">
-        <div class="afirm-counter" id="afirm-counter">1 / 18</div>
-        <div class="afirm-text" id="afirm-text"></div>
-        <div class="afirm-dots" id="afirm-dots"></div>
-        <div class="afirm-nav">
-          <button class="afirm-arrow" id="afirm-prev" onclick="afirmNav(-1)">←</button>
-          <button class="afirm-arrow" id="afirm-next" onclick="afirmNav(1)">→</button>
-        </div>
-        <div class="afirm-all-done" id="afirm-all-done">Completaste todas las afirmaciones de hoy ✓</div>
-      </div>
-    </div>
-
     <!-- POWER POSE -->
     <div class="pose-section">
       <div class="pose-header">Power Pose</div>
@@ -622,7 +590,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   </div>
 </div>
 
-<!-- GYM RUTINA -->
 <!-- CHANO TRAINING -->
 <div class="screen" id="screen-chano">
   <div class="topbar">
@@ -660,64 +627,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
   </div>
 </div>
 
-<div class="screen" id="screen-gym" style="background:var(--bg)">
-  <div class="topbar">
-    <div class="topbar-back" onclick="closeGym()">←</div>
-    <div class="topbar-title" style="font-family:'Playfair Display',serif;font-size:18px">Rutina</div>
-    <div class="topbar-sr" onclick="gymUndo()" style="font-size:11px">Atrás</div>
-  </div>
-  <div class="scroll-area">
-    <div id="gym-item-0" class="gym-item" onclick="gymTap(0)">
-      <div class="gym-info"><div class="gym-name">Puente dos piernas</div><div class="gym-desc">25 reps</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-0">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-1" class="gym-item" onclick="gymTap(1)">
-      <div class="gym-info"><div class="gym-name">Puente dos piernas + elevación derecha</div><div class="gym-desc">Aguanto 5 seg, bajo — 15 reps</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-1">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-2" class="gym-item" onclick="gymTap(2)">
-      <div class="gym-info"><div class="gym-name">Puente una pierna</div><div class="gym-desc">15 reps</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-2">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-3" class="gym-item" onclick="gymTap(3)">
-      <div class="gym-info"><div class="gym-name">Contracción de cuádriceps sentado</div><div class="gym-desc">Espalda recta, brazos al lado, piernas estiradas — 10 ambas + 10 por lado</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-3">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-4" class="gym-item" onclick="gymTap(4)">
-      <div class="gym-info"><div class="gym-name">Polea pierna izquierda</div><div class="gym-desc">4 direcciones</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-4">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-5" class="gym-item" onclick="gymTap(5)">
-      <div class="gym-info"><div class="gym-name">Imprinting lumbar</div><div class="gym-desc">Acostado, rodillas recogidas, espalda baja contra el piso, chupo panza, hipopresivo — 50 reps</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-5">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-6" class="gym-item" onclick="gymTap(6)">
-      <div class="gym-info"><div class="gym-name">Almohada entre rodillas</div><div class="gym-desc">Aprieto 3 seg, suelto — 25 reps</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-6">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-7" class="gym-item" onclick="gymTap(7)">
-      <div class="gym-info"><div class="gym-name">Rodillas al pecho + cuello</div><div class="gym-desc">Subo rodillas y cuello simultáneo manteniendo almohada</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-7">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-8" class="gym-item" onclick="gymTap(8)">
-      <div class="gym-info"><div class="gym-name">Equilibrio pierna derecha</div><div class="gym-desc">Izquierda doblada arriba, encuentro equilibrio, cierro ojos, secuencia de movimientos — 10 reps</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-8">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-9" class="gym-item" onclick="gymTap(9)">
-      <div class="gym-info"><div class="gym-name">Sube y baja pierna izquierda</div><div class="gym-desc">10 reps</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-9">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div id="gym-item-10" class="gym-item" onclick="gymTap(10)">
-      <div class="gym-info"><div class="gym-name">Toque de piso + extensión</div><div class="gym-desc">Toco piso derecha e izquierda, pierna contraria se estira atrás sin tocar — 10 reps</div></div>
-      <div class="gym-badge"><div class="gym-badge-num" id="gym-s-10">—</div><div class="gym-badge-lbl">series</div></div>
-    </div>
-    <div class="gym-footer">
-      <button class="gym-reset-btn" onclick="resetGym()">Reiniciar todo</button>
-    </div>
-    <div style="height:20px"></div>
-  </div>
-</div>
-
 <!-- MAIN APP (SR) -->
 <div class="screen" id="screen-app">
   <div class="topbar">
@@ -732,6 +641,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
       <div class="day-hero">
         <div class="day-num" id="dayNum">0</div>
         <div class="day-word" id="dayWord">días</div>
+        <div class="day-start" id="dayStart"></div>
         <div class="streak-dots" id="streakDots"></div>
       </div>
 
@@ -753,15 +663,6 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
         <div id="tipsContent"></div>
       </div>
 
-      <div class="card">
-        <div class="card-label" id="lbl-note">Nota del día</div>
-        <div class="voice-row">
-          <div class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎙</div>
-          <textarea class="note-area" id="noteInput" rows="3"></textarea>
-        </div>
-      </div>
-
-      <button class="save-btn" id="saveBtn" onclick="saveDay()">Guardar día</button>
       <button class="reset-btn" id="resetBtn" onclick="resetStreak()">Reiniciar racha</button>
       <div style="height:10px;"></div>
     </div>
@@ -866,7 +767,7 @@ html, body { height: 100%; overflow: hidden; background: var(--bg); color: var(-
 // ─── I18N ───────────────────────────────────────────────
 const T = {
   es: {
-    days: 'días de racha', day: 'día de racha',
+    days: 'días de racha', day: 'día de racha', startedLbl: 'Empezaste el',
     verse: 'Versículo del día', phase: 'En este punto...', mood: '¿Cómo te sentís hoy?',
     battle: '¿Tuviste tentaciones hoy?', vic: 'Victoria', fall: 'Caída', none: 'Ninguna',
     why: '¿Qué crees que la causó?', time: '¿En qué momento del día?',
@@ -911,7 +812,7 @@ const T = {
     recordNoSupport: 'Tu navegador no soporta dictado de voz',
   },
   en: {
-    days: 'day streak', day: 'day streak',
+    days: 'day streak', day: 'day streak', startedLbl: 'Started on',
     verse: 'Verse of the day', phase: 'At this point...', mood: 'How are you feeling today?',
     battle: 'Did you face temptation today?', vic: 'Victory', fall: 'Relapse', none: 'None',
     why: 'What do you think caused it?', time: 'What time of day?',
@@ -955,7 +856,7 @@ const T = {
     recordNoSupport: 'Your browser doesn\'t support voice dictation',
   },
   pt: {
-    days: 'dias de sequência', day: 'dia de sequência',
+    days: 'dias de sequência', day: 'dia de sequência', startedLbl: 'Começou em',
     verse: 'Versículo do dia', phase: 'Neste ponto...', mood: 'Como você está hoje?',
     battle: 'Teve tentações hoje?', vic: 'Vitória', fall: 'Recaída', none: 'Nenhuma',
     why: 'O que você acha que causou?', time: 'Em que momento do dia?',
@@ -1065,8 +966,6 @@ if (!S.startDate) S.startDate = dateMinusDays(S.days || 0);
 recomputeDays();
 let lang = S.lang || 'es';
 let t = T[lang];
-let recognition = null;
-let isRecording = false;
 
 // ─── ONBOARDING ──────────────────────────────────────────
 function onbLangChange() {
@@ -1241,56 +1140,10 @@ function afirmNav(dir) {
   if (navigator.vibrate) navigator.vibrate(10);
 }
 
-// ─── GYM ─────────────────────────────────────────────────
-var _gymSeries = [0,0,0,0,0,0,0,0,0,0,0];
-var _gymLastTapped = null;
-
-function openGym() {
-  document.getElementById('screen-corazon').classList.remove('active');
-  document.getElementById('screen-gym').classList.add('active');
-}
-
-function closeGym() {
-  document.getElementById('screen-gym').classList.remove('active');
-  document.getElementById('screen-corazon').classList.add('active');
-}
-
-function gymTap(i) {
-  _gymSeries[i]++;
-  _gymLastTapped = i;
-  var n = _gymSeries[i];
-  var numEl = document.getElementById('gym-s-' + i);
-  numEl.textContent = n;
-  numEl.classList.add('on');
-  var card = document.getElementById('gym-item-' + i);
-  card.className = 'gym-item ' + (n === 1 ? 's1' : n === 2 ? 's2' : 's3plus');
-  if (navigator.vibrate) navigator.vibrate(12);
-}
-
-function gymUndo() {
-  if (_gymLastTapped === null) return;
-  var i = _gymLastTapped;
-  if (_gymSeries[i] > 0) {
-    _gymSeries[i]--;
-    var n = _gymSeries[i];
-    var numEl = document.getElementById('gym-s-' + i);
-    numEl.textContent = n === 0 ? '—' : n;
-    if (n === 0) numEl.classList.remove('on');
-    var card = document.getElementById('gym-item-' + i);
-    card.className = 'gym-item' + (n === 0 ? '' : n === 1 ? ' s1' : n === 2 ? ' s2' : ' s3plus');
-    if (navigator.vibrate) navigator.vibrate(8);
-    if (n === 0) _gymLastTapped = null;
-  }
-}
-
-function resetGym() {
-  _gymSeries = [0,0,0,0,0,0,0,0,0,0,0];
-  for (var i = 0; i < 11; i++) {
-    var numEl = document.getElementById('gym-s-' + i);
-    if (numEl) { numEl.textContent = '—'; numEl.classList.remove('on'); }
-    var card = document.getElementById('gym-item-' + i);
-    if (card) card.className = 'gym-item';
-  }
+function afirmReset() {
+  saveAfirmIdx(0);
+  renderAfirm();
+  if (navigator.vibrate) navigator.vibrate(10);
 }
 
 // ─── ACTIVIDADES ─────────────────────────────────────────
@@ -1444,9 +1297,6 @@ function applyLang() {
   document.getElementById('dayWord').textContent = t.days;
   document.getElementById('lbl-verse').textContent = t.verse;
   document.getElementById('lbl-phase').textContent = t.phase;
-  document.getElementById('lbl-note').textContent = t.note;
-  document.getElementById('noteInput').placeholder = t.notePH;
-  document.getElementById('saveBtn').textContent = t.save;
   document.getElementById('resetBtn').textContent = t.reset;
   document.getElementById('lbl-benefit').textContent = t.benefitLbl || 'Lo que la mayoría siente ahora';
   document.getElementById('lbl-tips').textContent = t.tipsTitle || 'Qué ayuda ahora';
@@ -1468,10 +1318,19 @@ function applyLang() {
   buildIdentity();
 }
 
+function formatStartDate() {
+  if (!S.startDate) return '';
+  var p = S.startDate.split('-');
+  var d = new Date(+p[0], +p[1]-1, +p[2]);
+  var locale = lang === 'en' ? 'en' : lang === 'pt' ? 'pt-BR' : 'es';
+  return d.toLocaleDateString(locale, { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 function render() {
   recomputeDays();
   const days = S.days;
   document.getElementById('dayNum').textContent = days;
+  document.getElementById('dayStart').textContent = t.startedLbl + ' ' + formatStartDate();
   const v = VERSES[lang][days % VERSES[lang].length];
   document.getElementById('verseText').textContent = v.text;
   document.getElementById('verseRef').textContent = '— ' + v.ref;
@@ -1550,7 +1409,6 @@ function buildIdentity() {
 function restoreTodayState() {
   buildMoodGrid();
   buildFallGrids();
-  if (S.todayNote) document.getElementById('noteInput').value = S.todayNote;
   renderTips();
 }
 
@@ -1597,29 +1455,6 @@ function toggleMood(m) {
   renderTips();
 }
 
-
-function saveDay() {
-  const note = document.getElementById('noteInput').value.trim();
-  const today = localDate();
-  recomputeDays();
-  S.log = S.log || [];
-  const existing = S.log.findIndex(e => e.date === today);
-  const entry = {
-    day: S.days, date: today, lang,
-    moods: [...(S.todayMoods||[])], victory: S.todayVictory,
-    causes: [...(S.todayCauses || [])], time: S.todayTime,
-    actions: [...(S.todayActions||[])], note
-  };
-  if (existing >= 0) { S.log[existing] = entry; }
-  else { S.log.push(entry); }
-  S.todayMoods = []; S.todayVictory = null; S.todayCauses = []; S.todayTime = null; S.todayActions = [];
-  document.getElementById('noteInput').value = '';
-  document.getElementById('hadTemSection')?.classList.remove('visible');
-  document.getElementById('fallSection')?.classList.remove('visible');
-  save();
-  render();
-  toast(t.saved);
-}
 
 function resetStreak() {
   if (!confirm(t.confirmReset)) return;
@@ -1746,33 +1581,6 @@ function exportData() {
   a.href = URL.createObjectURL(blob);
   a.download = 'renovar-export.json';
   a.click();
-}
-
-// ─── VOICE ───────────────────────────────────────────────
-function toggleVoice() {
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    toast(t.recordNoSupport); return;
-  }
-  if (isRecording) { recognition && recognition.stop(); return; }
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  recognition = new SR();
-  recognition.lang = lang === 'es' ? 'es-PY' : lang === 'pt' ? 'pt-BR' : 'en-US';
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  const btn = document.getElementById('voiceBtn');
-  const area = document.getElementById('noteInput');
-  const existing = area.value;
-  recognition.onstart = () => { isRecording = true; btn.classList.add('recording'); btn.textContent = '⏹'; toast(t.recording); };
-  recognition.onresult = (e) => {
-    let transcript = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      transcript += e.results[i][0].transcript;
-    }
-    area.value = existing + (existing ? ' ' : '') + transcript;
-  };
-  recognition.onend = () => { isRecording = false; btn.classList.remove('recording'); btn.textContent = '🎙'; toast(t.recordingDone); };
-  recognition.onerror = () => { isRecording = false; btn.classList.remove('recording'); btn.textContent = '🎙'; };
-  recognition.start();
 }
 
 // ─── UTILS ───────────────────────────────────────────────
